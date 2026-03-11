@@ -48,7 +48,7 @@ Für Kotlin selbst ist in der Regel nichts extra nötig, da Kotlin in Android St
 
 ## Projektstruktur
 
-Empfohlene grobe Struktur:
+Grobe Struktur:
 
 ```text
 app/
