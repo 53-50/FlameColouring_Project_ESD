@@ -1,4 +1,4 @@
-package at.hcw.flaco
+package at.hcw.flaminco
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

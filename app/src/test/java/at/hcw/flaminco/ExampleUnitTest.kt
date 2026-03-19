@@ -1,4 +1,4 @@
-package at.hcw.flaco
+package at.hcw.flaminco
 
 import org.junit.Test
 
