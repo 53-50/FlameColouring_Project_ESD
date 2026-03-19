@@ -30,6 +30,18 @@
             android:screenOrientation="landscape" />
 
         <activity
+            android:name="at.hcw.flaminco.ReferenceDataActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name="at.hcw.flaminco.SampleActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name="at.hcw.flaminco.SampleDataActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
             android:name="at.hcw.flaminco.MainActivity"
             android:exported="true"
             android:screenOrientation="landscape">

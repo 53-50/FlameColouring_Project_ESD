@@ -22,7 +22,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Baseline Data View"
+                android:text="Sample Data View"
                 android:textColor="@color/text_dark"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -52,7 +52,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Baseline Data:"
+                android:text="Sample Data:"
                 android:textColor="@color/text_dark"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -61,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Metric1: 0,23&#10;Metric2: 0,87&#10;this is hardcoded"
+                android:text="Metric1: 0,23&#10;Metric2: 0,87&#10;Metric3: 0,07&#10;Metric4: 0,15&#10;Metric5: 0,34"
                 android:textColor="@color/text_dark"
                 android:textSize="20sp" />
         </LinearLayout>
@@ -72,7 +72,7 @@
             android:layout_weight="1" />
 
         <Button
-            android:id="@+id/btnBackBaselineData"
+            android:id="@+id/btnBackSampleData"
             android:layout_width="220dp"
             android:layout_height="54dp"
             android:layout_gravity="end"
