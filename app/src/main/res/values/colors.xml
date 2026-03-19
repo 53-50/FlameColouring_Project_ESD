@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="mockup_bg">#E7A38E</color>
+    <color name="panel_border">#D86F42</color>
+    <color name="card_bg">#F2F2F2</color>
+
+    <color name="btn_orange">#F47C20</color>
+    <color name="btn_green">#08B84F</color>
+    <color name="btn_yellow">#F4BE00</color>
+    <color name="btn_red">#FF5A57</color>
+    <color name="btn_gray">#A8A8A8</color>
+
+    <color name="text_dark">#111111</color>
+    <color name="white">#FFFFFF</color>
 </resources>
