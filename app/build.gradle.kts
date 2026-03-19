@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "at.hcw.flaco"
+    namespace = "at.hcw.flaminco"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "at.hcw.flaco"
+        applicationId = "at.hcw.flaminco"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

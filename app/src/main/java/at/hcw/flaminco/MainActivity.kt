@@ -1,20 +1,39 @@
 package at.hcw.flaminco
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        setContentView(R.layout.activity_main_menu)
+
+        findViewById<Button>(R.id.btnRecordBaseline).setOnClickListener {
+            startActivity(Intent(this, BaselineActivity::class.java))
+        }
+
+        findViewById<Button>(R.id.btnViewBaseline).setOnClickListener {
+            startActivity(Intent(this, BaselineDataActivity::class.java))
+        }
+
+        findViewById<Button>(R.id.btnRecordReference).setOnClickListener {
+            startActivity(Intent(this, ReferenceActivity::class.java))
+        }
+
+       /* findViewById<Button>(R.id.btnViewReference).setOnClickListener {
+            startActivity(Intent(this, ReferenceDataActivity::class.java))
+
+        }*/
+
+        findViewById<Button>(R.id.btnCompare).setOnClickListener {
+            startActivity(Intent(this, ComparisonActivity::class.java))
+        }
+
+        findViewById<Button>(R.id.btnQuit).setOnClickListener {
+            finish()
         }
     }
 }

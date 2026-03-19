@@ -10,16 +10,35 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FlaCo">
+        android:theme="@style/Theme.FlaCo"
+        tools:targetApi="31">
+
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name="at.hcw.flaminco.ComparisonActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name="at.hcw.flaminco.ReferenceActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name="at.hcw.flaminco.BaselineActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name="at.hcw.flaminco.BaselineDataActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name="at.hcw.flaminco.MainActivity"
+            android:exported="true"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
