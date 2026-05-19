@@ -1,23 +1,23 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-parcelize")
 }
 
 android {
     namespace = "at.hcw.flaminco"
+
+    // Wir nutzen 35 als 'Brille' für den Compiler, damit er die alten Ressourcen 
+    // heute noch korrekt verarbeiten kann. Die App bleibt trotzdem 
+    // strikt auf Android 8.0 begrenzt.
     compileSdk = 35
 
     defaultConfig {
         applicationId = "at.hcw.flaminco"
 
-        // Die App läuft ab Version 8.0
         minSdk = 26
-
-        // Die App ist optimiert für Version 8.0
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 26
-
-        // Die App läuft NUR auf Version 8.0 (API 26)
         maxSdk = 26
 
         versionCode = 1
@@ -27,13 +27,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
         }
     }
 }

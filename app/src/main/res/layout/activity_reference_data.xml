@@ -26,16 +26,6 @@
                 android:textColor="@color/text_dark"
                 android:textSize="28sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/bg_card"
-                android:gravity="center"
-                android:text="i"
-                android:textColor="@color/text_dark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
         </LinearLayout>
 
         <Space
@@ -48,83 +38,21 @@
             android:scrollbars="none">
 
             <LinearLayout
+                android:id="@+id/llReferencesContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="190dp"
+                <!-- Dynamic cards will be added here -->
+                <TextView
+                    android:id="@+id/tvNoReferences"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_card"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:text="No references recorded yet."
+                    android:textColor="@color/text_dark"
+                    android:textSize="18sp"
+                    android:visibility="gone"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ref1 Data:"
-                        android:textColor="@color/text_dark"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Metric1: 0,23&#10;Metric2: 0,87&#10;Metric3: 0,07&#10;Metric4: 0,15&#10;Metric5: 0,34"
-                        android:textColor="@color/text_dark"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="190dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_card"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ref2 Data:"
-                        android:textColor="@color/text_dark"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Metric1: 0,23&#10;Metric2: 0,87&#10;Metric3: 0,07&#10;Metric4: 0,15&#10;Metric5: 0,34"
-                        android:textColor="@color/text_dark"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="190dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_card"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ref3 Data:"
-                        android:textColor="@color/text_dark"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Metric1: 0,23&#10;Metric2: 0,87&#10;Metric3: 0,07&#10;Metric4: 0,15&#10;Metric5: 0,34"
-                        android:textColor="@color/text_dark"
-                        android:textSize="18sp" />
-                </LinearLayout>
             </LinearLayout>
         </HorizontalScrollView>
 
