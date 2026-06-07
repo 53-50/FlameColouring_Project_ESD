@@ -153,7 +153,7 @@ class ReferenceActivity : AppCompatActivity() {
                     timestamp = Date(),
                     durationSec = 2,
                     roi = RegionOfInterest(0, 0, ROI_WIDTH, ROI_HEIGHT),
-                    cameraConfig = CameraConfiguration(400, 20000000L, "OFF", "OFF", 1920, 1080),
+                    cameraConfig = CameraConfiguration.standard(),
                     rawFrames = emptyList(),
                     featureSets = emptyList(),
                     vector = vector,
@@ -232,10 +232,8 @@ class ReferenceActivity : AppCompatActivity() {
         val builder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
         builder?.addTarget(surface)
 
-        builder?.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF)
-        builder?.set(CaptureRequest.SENSOR_EXPOSURE_TIME, 20000000L) 
-        builder?.set(CaptureRequest.SENSOR_SENSITIVITY, 400)
-        builder?.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF)
+        // FR-M-12: Use centralized camera configuration to lock parameters
+        CameraConfiguration.standard().applyTo(builder!!)
 
         cameraDevice?.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
             override fun onConfigured(session: CameraCaptureSession) {
