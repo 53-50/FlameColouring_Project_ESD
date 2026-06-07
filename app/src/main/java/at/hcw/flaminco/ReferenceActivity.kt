@@ -89,6 +89,11 @@ class ReferenceActivity : AppCompatActivity() {
     }
 
     private fun startRecording() {
+        if (DataManager.baseline == null) {
+            Toast.makeText(this, "Please record a Baseline first!", Toast.LENGTH_LONG).show()
+            return
+        }
+
         isRecording = true
         recordedFrames.clear()
         btnRecord.isEnabled = false
@@ -109,7 +114,7 @@ class ReferenceActivity : AppCompatActivity() {
             val hsv = FloatArray(3)
             Color.RGBToHSV(avgR.toInt(), avgG.toInt(), avgB.toInt(), hsv)
             
-            val vector = MeasurementVector(
+            val rawVector = MeasurementVector(
                 values = listOf(avgR.toDouble(), avgG.toDouble(), avgB.toDouble()),
                 meanHue = hsv[0].toDouble(),
                 meanSaturation = hsv[1].toDouble(),
@@ -117,8 +122,13 @@ class ReferenceActivity : AppCompatActivity() {
                 intensityMean = (avgR + avgG + avgB).toDouble() / 3.0,
                 intensityMax = maxOf(avgR, avgG, avgB).toDouble()
             )
+
+            // FR-M-5: Subtract baseline from reference
+            val correctedVector = DataManager.baseline?.let {
+                rawVector.subtract(it.vector)
+            } ?: rawVector
             
-            showReferenceDialog(vector)
+            showReferenceDialog(correctedVector)
         } else {
             Toast.makeText(this, "Capture failed. No frames recorded.", Toast.LENGTH_LONG).show()
         }

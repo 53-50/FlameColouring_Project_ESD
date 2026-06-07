@@ -114,24 +114,24 @@ class SampleActivity : AppCompatActivity() {
             val rawG = recordedFrames.map { it.g }.average().toFloat()
             val rawB = recordedFrames.map { it.b }.average().toFloat()
             
-            val base = DataManager.baseline!!
-            val finalR = (rawR - base.vector.values[0].toFloat()).coerceAtLeast(0f)
-            val finalG = (rawG - base.vector.values[1].toFloat()).coerceAtLeast(0f)
-            val finalB = (rawB - base.vector.values[2].toFloat()).coerceAtLeast(0f)
-            
             val hsv = FloatArray(3)
-            Color.RGBToHSV(finalR.toInt(), finalG.toInt(), finalB.toInt(), hsv)
+            Color.RGBToHSV(rawR.toInt(), rawG.toInt(), rawB.toInt(), hsv)
 
-            val vector = MeasurementVector(
-                values = listOf(finalR.toDouble(), finalG.toDouble(), finalB.toDouble()),
+            val rawVector = MeasurementVector(
+                values = listOf(rawR.toDouble(), rawG.toDouble(), rawB.toDouble()),
                 meanHue = hsv[0].toDouble(),
                 meanSaturation = hsv[1].toDouble(),
                 meanValue = hsv[2].toDouble(),
-                intensityMean = (finalR + finalG + finalB).toDouble() / 3.0,
-                intensityMax = maxOf(finalR, finalG, finalB).toDouble()
+                intensityMean = (rawR + rawG + rawB).toDouble() / 3.0,
+                intensityMax = maxOf(rawR, rawG, rawB).toDouble()
             )
+
+            // FR-M-5: Subtract baseline from sample using centralized method
+            val correctedVector = DataManager.baseline?.let {
+                rawVector.subtract(it.vector)
+            } ?: rawVector
             
-            showSampleNameDialog(vector)
+            showSampleNameDialog(correctedVector)
         } else {
             Toast.makeText(this, "Capture failed. No frames recorded.", Toast.LENGTH_LONG).show()
         }
