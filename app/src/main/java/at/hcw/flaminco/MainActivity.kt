@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -61,7 +62,36 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
+            // FR-M-18: Explain the necessity of the camera before requesting permission
+            AlertDialog.Builder(this)
+                .setTitle("Kamerazugriff benötigt")
+                .setMessage("Diese App nutzt die Kamera, um Flammenfarben spektroskopisch zu analysieren. Ohne diesen Zugriff kann die Applikation nicht betrieben werden.")
+                .setPositiveButton("Verstanden") { _, _ ->
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
+                }
+                .setNegativeButton("Beenden") { _, _ ->
+                    finish()
+                }
+                .setCancelable(false)
+                .show()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Kamera bereit", Toast.LENGTH_SHORT).show()
+            } else {
+                // FR-M-18: Inform user that camera is necessary after denial
+                AlertDialog.Builder(this)
+                    .setTitle("Eingeschränkte Funktion")
+                    .setMessage("Ohne Kamerazugriff ist keine Messung möglich. Du kannst die Berechtigung jederzeit in den Systemeinstellungen ändern.")
+                    .setPositiveButton("OK") { _, _ -> 
+                        // We allow them to stay in the menu but warn them again if they try to record
+                    }
+                    .show()
+            }
         }
     }
 
