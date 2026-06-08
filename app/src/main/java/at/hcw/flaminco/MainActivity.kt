@@ -17,47 +17,101 @@ class MainActivity : AppCompatActivity() {
 
     private val CAMERA_PERMISSION_CODE = 100
 
+    private lateinit var btnRecordBaseline: Button
+    private lateinit var btnViewBaseline: Button
+    private lateinit var btnRecordReference: Button
+    private lateinit var btnViewReference: Button
+    private lateinit var btnRecordSample: Button
+    private lateinit var btnViewSample: Button
+    private lateinit var btnCompare: Button
+    private lateinit var btnExport: Button
+    private lateinit var btnQuit: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
 
+        initButtons()
         checkPermissions()
+        updateButtonStates()
+    }
 
-        findViewById<Button>(R.id.btnRecordBaseline).setOnClickListener {
+    private fun initButtons() {
+        btnRecordBaseline = findViewById(R.id.btnRecordBaseline)
+        btnViewBaseline = findViewById(R.id.btnViewBaseline)
+        btnRecordReference = findViewById(R.id.btnRecordReference)
+        btnViewReference = findViewById(R.id.btnViewReference)
+        btnRecordSample = findViewById(R.id.btnRecordSample)
+        btnViewSample = findViewById(R.id.btnViewSample)
+        btnCompare = findViewById(R.id.btnCompare)
+        btnExport = findViewById(R.id.btnExport)
+        btnQuit = findViewById(R.id.btnQuit)
+
+        btnRecordBaseline.setOnClickListener {
             startActivity(Intent(this, BaselineActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnViewBaseline).setOnClickListener {
+        btnViewBaseline.setOnClickListener {
             startActivity(Intent(this, BaselineDataActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnRecordReference).setOnClickListener {
+        btnRecordReference.setOnClickListener {
             startActivity(Intent(this, ReferenceActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnViewReference).setOnClickListener {
+        btnViewReference.setOnClickListener {
             startActivity(Intent(this, ReferenceDataActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnRecordSample).setOnClickListener {
+        btnRecordSample.setOnClickListener {
             startActivity(Intent(this, SampleActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnViewSample).setOnClickListener {
+        btnViewSample.setOnClickListener {
             startActivity(Intent(this, SampleDataActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnCompare).setOnClickListener {
+        btnCompare.setOnClickListener {
             startActivity(Intent(this, ComparisonActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnExport).setOnClickListener {
+        btnExport.setOnClickListener {
             exportDataToCSV()
         }
 
-        findViewById<Button>(R.id.btnQuit).setOnClickListener {
+        btnQuit.setOnClickListener {
             finish()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateButtonStates()
+    }
+
+    private fun updateButtonStates() {
+        val hasBaseline = DataManager.baseline != null
+        val hasRef = DataManager.references.isNotEmpty()
+        val hasSample = DataManager.samples.isNotEmpty()
+
+        // Step 1: Baseline is the entry point
+        updateButton(btnRecordBaseline, true)
+        updateButton(btnViewBaseline, hasBaseline)
+
+        // Step 2: Reference and Sample require a baseline (FR-M-5 / FR-M-19)
+        updateButton(btnRecordReference, hasBaseline)
+        updateButton(btnViewReference, hasRef)
+        updateButton(btnRecordSample, hasBaseline)
+        updateButton(btnViewSample, hasSample)
+
+        // Step 3: Comparison requires at least one of each
+        updateButton(btnCompare, hasRef && hasSample)
+        updateButton(btnExport, hasSample || hasRef)
+    }
+
+    private fun updateButton(button: Button, enabled: Boolean) {
+        button.isEnabled = enabled
+        button.alpha = if (enabled) 1.0f else 0.4f
     }
 
     private fun checkPermissions() {
