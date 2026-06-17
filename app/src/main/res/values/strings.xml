@@ -17,4 +17,12 @@
     <string name="btn_quit">Quit</string>
     <string name="status_starting_in">Status: Starting in %1$d&#8230;</string>
     <string name="status_recording">Status: Recording&#8230;</string>
+
+    <string name="camera_permission_title">Camera Access Required</string>
+    <string name="camera_permission_message">This app uses the camera to analyze flame colors spectroscopically. Without camera access, measurements cannot be performed.</string>
+    <string name="camera_permission_understood">Continue</string>
+    <string name="camera_permission_exit">Exit</string>
+    <string name="camera_permission_ready">Camera ready</string>
+    <string name="camera_permission_denied_title">Limited Functionality</string>
+    <string name="camera_permission_denied_message">Without camera access, no measurements are possible. You can change this permission anytime in system settings.</string>
 </resources>

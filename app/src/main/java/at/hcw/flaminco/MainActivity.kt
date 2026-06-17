@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
 
         // Step 3: Comparison requires at least one of each
         updateButton(btnCompare, hasRef && hasSample)
-        updateButton(btnExport, hasSample || hasRef)
+        updateButton(btnExport, hasBaseline || hasRef || hasSample)
     }
 
     private fun updateButton(button: Button, enabled: Boolean) {
@@ -180,12 +180,12 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // FR-M-18: Explain the necessity of the camera before requesting permission
             AlertDialog.Builder(this)
-                .setTitle("Kamerazugriff benötigt")
-                .setMessage("Diese App nutzt die Kamera, um Flammenfarben spektroskopisch zu analysieren. Ohne diesen Zugriff kann die Applikation nicht betrieben werden.")
-                .setPositiveButton("Verstanden") { _, _ ->
+                .setTitle(R.string.camera_permission_title)
+                .setMessage(R.string.camera_permission_message)
+                .setPositiveButton(R.string.camera_permission_understood) { _, _ ->
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), cameraPermissionCode)
                 }
-                .setNegativeButton("Beenden") { _, _ ->
+                .setNegativeButton(R.string.camera_permission_exit) { _, _ ->
                     finish()
                 }
                 .setCancelable(false)
@@ -197,13 +197,13 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == cameraPermissionCode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Kamera bereit", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.camera_permission_ready, Toast.LENGTH_SHORT).show()
             } else {
                 // FR-M-18: Inform user that camera is necessary after denial
                 AlertDialog.Builder(this)
-                    .setTitle("Eingeschränkte Funktion")
-                    .setMessage("Ohne Kamerazugriff ist keine Messung möglich. Du kannst die Berechtigung jederzeit in den Systemeinstellungen ändern.")
-                    .setPositiveButton("OK") { _, _ -> 
+                    .setTitle(R.string.camera_permission_denied_title)
+                    .setMessage(R.string.camera_permission_denied_message)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> 
                         // We allow them to stay in the menu but warn them again if they try to record
                     }
                     .show()
@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun exportDataToCSV() {
-        if (DataManager.references.isEmpty() && DataManager.samples.isEmpty()) {
+        if (DataManager.baseline == null && DataManager.references.isEmpty() && DataManager.samples.isEmpty()) {
             Toast.makeText(this, "No measurements to export!", Toast.LENGTH_SHORT).show()
             return
         }
@@ -220,16 +220,19 @@ class MainActivity : AppCompatActivity() {
             val folder = getExternalFilesDir(null)
             val file = File(folder, "flaminco_export.csv")
             val writer = FileWriter(file)
-            writer.append("Type,Name,R,G,B,H,S,V\n")
-            
-            DataManager.references.forEach { 
-                val v = it.vector
-                writer.append("Ref,${it.elementName},${v.values[0]},${v.values[1]},${v.values[2]},${v.meanHue},${v.meanSaturation},${v.meanValue}\n") 
+            writer.append("Type,Name,Zone,R,G,B,H,S,V\n")
+
+            DataManager.baseline?.let { baseline ->
+                appendMeasurementRows(writer, "Baseline", "Baseline", baseline.vector, baseline.zoneVectors)
             }
-            
-            DataManager.samples.forEach { 
-                val v = it.vector
-                writer.append("Sample,${it.id},${v.values[0]},${v.values[1]},${v.values[2]},${v.meanHue},${v.meanSaturation},${v.meanValue}\n") 
+
+            DataManager.references.forEach { ref ->
+                appendMeasurementRows(writer, "Ref", ref.elementName, ref.vector, ref.zoneVectors)
+            }
+
+            DataManager.samples.forEach { sample ->
+                val name = sample.getProbableMatch() ?: sample.id
+                appendMeasurementRows(writer, "Sample", name, sample.vector, sample.zoneVectors)
             }
 
             writer.flush()
@@ -239,6 +242,56 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Export failed", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
+    }
+
+    private fun appendMeasurementRows(
+        writer: FileWriter,
+        type: String,
+        name: String,
+        vector: MeasurementVector,
+        zones: ZonedMeasurementVectors?
+    ) {
+        writer.append(formatCsvRow(type, name, "Full", vector))
+        if (zones != null) {
+            writer.append(formatCsvRow(type, name, "Top", zones.top))
+            writer.append(formatCsvRow(type, name, "Middle", zones.middle))
+            writer.append(formatCsvRow(type, name, "Bottom", zones.bottom))
+        }
+    }
+
+    private fun formatCsvRow(
+        type: String,
+        name: String,
+        zone: String,
+        vector: MeasurementVector
+    ): String {
+        return buildString {
+            append(type)
+            append(',')
+            append(escapeCsv(name))
+            append(',')
+            append(zone)
+            append(',')
+            append(vector.values[0])
+            append(',')
+            append(vector.values[1])
+            append(',')
+            append(vector.values[2])
+            append(',')
+            append(vector.meanHue)
+            append(',')
+            append(vector.meanSaturation)
+            append(',')
+            append(vector.meanValue)
+            append('\n')
+        }
+    }
+
+    private fun escapeCsv(value: String): String {
+        if (value.contains(',') || value.contains('"') || value.contains('\n')) {
+            return "\"${value.replace("\"", "\"\"")}\""
+        }
+        return value
     }
 
     private fun loadDemoData() {
