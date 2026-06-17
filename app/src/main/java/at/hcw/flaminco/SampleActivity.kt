@@ -99,6 +99,10 @@ class SampleActivity : AppCompatActivity() {
             Toast.makeText(this, "Please record a Baseline first!", Toast.LENGTH_LONG).show()
             return
         }
+        if (DataManager.session.isSampleLimitReached()) {
+            Toast.makeText(this, "Maximum of 3 samples reached.", Toast.LENGTH_LONG).show()
+            return
+        }
         
         isRecording = true
         recordedFrames.clear()
@@ -167,7 +171,7 @@ class SampleActivity : AppCompatActivity() {
                     setProbableMatch(sampleName) // We store the display name here
                 }
                 
-                DataManager.samples.add(sampleMeasurement)
+                DataManager.session.addSamples(sampleMeasurement)
                 tvStatus.text = "Status: Saved $sampleName"
                 Toast.makeText(this, "$sampleName saved", Toast.LENGTH_SHORT).show()
             }

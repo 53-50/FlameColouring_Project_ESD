@@ -96,6 +96,10 @@ class ReferenceActivity : AppCompatActivity() {
             Toast.makeText(this, "Please record a Baseline first!", Toast.LENGTH_LONG).show()
             return
         }
+        if (DataManager.session.isReferenceLimitReached()) {
+            Toast.makeText(this, "Maximum of 5 references reached.", Toast.LENGTH_LONG).show()
+            return
+        }
 
         isRecording = true
         recordedFrames.clear()
@@ -163,7 +167,7 @@ class ReferenceActivity : AppCompatActivity() {
                     elementName = elementName
                 )
                 
-                DataManager.references.add(referenceMeasurement)
+                DataManager.session.addReference(referenceMeasurement)
                 tvStatus.text = "Status: Saved $elementName"
                 Toast.makeText(this, "$elementName added", Toast.LENGTH_SHORT).show()
             }
