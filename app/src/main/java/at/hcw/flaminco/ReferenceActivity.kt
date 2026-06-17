@@ -165,7 +165,7 @@ class ReferenceActivity : AppCompatActivity() {
                     roi = currentRegionOfInterest(),
                     cameraConfig = CameraConfiguration.standard(),
                     rawFrames = emptyList(),
-                    featureSets = emptyList(),
+                    featureSets = recordedFeatureSets(),
                     vector = vector,
                     elementName = elementName
                 )
@@ -239,6 +239,19 @@ class ReferenceActivity : AppCompatActivity() {
     private fun currentRegionOfInterest(): RegionOfInterest {
         val roi = lastAnalyzedRoi ?: Rect(0, 0, ROI_WIDTH, ROI_HEIGHT)
         return RegionOfInterest(roi.left, roi.top, roi.width(), roi.height())
+    }
+
+    private fun recordedFeatureSets(): List<FrameFeatureSet> {
+        return recordedFrames.mapIndexed { index, frame ->
+            FrameFeatureSet(
+                frameIndex = index,
+                meanChannel1 = frame.r.toDouble(),
+                meanChannel2 = frame.g.toDouble(),
+                meanChannel3 = frame.b.toDouble(),
+                intensityMean = (frame.r + frame.g + frame.b).toDouble() / 3.0,
+                intensityMax = maxOf(frame.r, frame.g, frame.b).toDouble()
+            )
+        }
     }
 
     private fun centeredFallbackRoi(bitmap: Bitmap): Rect {
