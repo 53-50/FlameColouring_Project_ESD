@@ -5,13 +5,20 @@ import android.content.Context
 import android.graphics.*
 import android.hardware.camera2.*
 import android.os.*
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.view.Gravity
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -147,39 +154,148 @@ class ReferenceActivity : AppCompatActivity() {
     }
 
     private fun showReferenceDialog(vector: MeasurementVector) {
-        val input = EditText(this)
-        input.hint = "e.g. Lithium, Copper..."
-        
-        AlertDialog.Builder(this)
-            .setTitle("Measurement Results")
-            .setMessage("The recording is finished. Enter a name to save or discard the measurement.")
-            .setView(input)
-            .setPositiveButton("Save") { _, _ ->
-                val name = input.text.toString().trim()
-                val elementName = if (name.isNotEmpty()) name else "Reference #${DataManager.references.size + 1}"
-                
-                val referenceMeasurement = ReferenceMeasurement(
-                    id = UUID.randomUUID().toString(),
-                    timestamp = Date(),
-                    durationSec = 2,
-                    roi = currentRegionOfInterest(),
-                    cameraConfig = CameraConfiguration.standard(),
-                    rawFrames = emptyList(),
-                    featureSets = recordedFeatureSets(),
-                    vector = vector,
-                    elementName = elementName
-                )
-                
-                DataManager.session.addReference(referenceMeasurement)
-                tvStatus.text = "Status: Saved $elementName"
-                Toast.makeText(this, "$elementName added", Toast.LENGTH_SHORT).show()
-            }
+        val elements = listOf(
+            ElementOption("Sb", "Antimony", "#BDBDBD"),
+            ElementOption("Ba", "Barium", "#8BC34A"),
+            ElementOption("Bi", "Bismuth", "#BDBDBD"),
+            ElementOption("Ca", "Calcium", "#FF8A50"),
+            ElementOption("Cu", "Copper", "#4DD0E1"),
+            ElementOption("Fe", "Iron", "#FFC107"),
+            ElementOption("Pb", "Lead", "#BDBDBD"),
+            ElementOption("K", "Potassium", "#BA68C8"),
+            ElementOption("Na", "Sodium", "#FFD54F"),
+            ElementOption("Sr", "Strontium", "#EF5350"),
+            ElementOption("Sn", "Tin", "#BDBDBD")
+        )
+
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 8, 16, 8)
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Select Reference Element")
+            .setMessage("The recording is finished. Choose the known element or use Other.")
+            .setView(ScrollView(this).apply { addView(content) })
             .setNegativeButton("Discard") { dialog, _ ->
                 tvStatus.text = "Status: Discarded"
                 dialog.dismiss()
             }
             .setCancelable(false)
+            .create()
+
+        (elements.map<ElementOption, ElementGridItem> { ElementGridItem.Element(it) } + ElementGridItem.Other)
+            .chunked(4)
+            .forEach { rowItems ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+            }
+            rowItems.forEach { item ->
+                when (item) {
+                    is ElementGridItem.Element -> {
+                        val element = item.option
+                        row.addView(createElementButton("${element.symbol}\n${element.name}", element.colorHex) {
+                            saveReference(vector, "${element.symbol} - ${element.name}")
+                            dialog.dismiss()
+                        })
+                    }
+                    ElementGridItem.Other -> {
+                        row.addView(createElementButton("Other\nCustom", "#E0E0E0") {
+                            dialog.dismiss()
+                            showOtherElementDialog(vector)
+                        })
+                    }
+                }
+            }
+            content.addView(row)
+        }
+
+        dialog.show()
+    }
+
+    private fun createElementButton(label: String, colorHex: String, onClick: () -> Unit): TextView {
+        return TextView(this).apply {
+            text = styledElementLabel(label)
+            textSize = 12f
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            setPadding(dp(4), dp(4), dp(4), dp(4))
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.parseColor(colorHex))
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { onClick() }
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                dp(58),
+                1f
+            ).apply {
+                setMargins(dp(3), dp(3), dp(3), dp(3))
+            }
+        }
+    }
+
+    private fun styledElementLabel(label: String): SpannableString {
+        val styled = SpannableString(label)
+        val symbolEnd = label.indexOf('\n').takeIf { it >= 0 } ?: label.length
+        styled.setSpan(StyleSpan(android.graphics.Typeface.BOLD), 0, symbolEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        styled.setSpan(RelativeSizeSpan(1.15f), 0, symbolEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        if (symbolEnd + 1 < label.length) {
+            styled.setSpan(RelativeSizeSpan(0.85f), symbolEnd + 1, label.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        return styled
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
+    }
+
+    private data class ElementOption(
+        val symbol: String,
+        val name: String,
+        val colorHex: String
+    )
+
+    private sealed class ElementGridItem {
+        data class Element(val option: ElementOption) : ElementGridItem()
+        data object Other : ElementGridItem()
+    }
+
+    private fun showOtherElementDialog(vector: MeasurementVector) {
+        val input = EditText(this)
+        input.hint = "Element name"
+
+        AlertDialog.Builder(this)
+            .setTitle("Other Element")
+            .setView(input)
+            .setPositiveButton("Save") { _, _ ->
+                val name = input.text.toString().trim()
+                val elementName = if (name.isNotEmpty()) name else "Reference #${DataManager.references.size + 1}"
+                saveReference(vector, elementName)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                tvStatus.text = "Status: Discarded"
+                dialog.dismiss()
+            }
             .show()
+    }
+
+    private fun saveReference(vector: MeasurementVector, elementName: String) {
+        val referenceMeasurement = ReferenceMeasurement(
+            id = UUID.randomUUID().toString(),
+            timestamp = Date(),
+            durationSec = 2,
+            roi = currentRegionOfInterest(),
+            cameraConfig = CameraConfiguration.standard(),
+            rawFrames = emptyList(),
+            featureSets = recordedFeatureSets(),
+            vector = vector,
+            elementName = elementName
+        )
+
+        DataManager.session.addReference(referenceMeasurement)
+        tvStatus.text = "Status: Saved $elementName"
+        Toast.makeText(this, "$elementName added", Toast.LENGTH_SHORT).show()
     }
 
     private fun analyzeFrame() {
