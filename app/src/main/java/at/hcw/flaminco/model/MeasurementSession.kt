@@ -9,6 +9,7 @@ data class MeasurementSession(
     val sessionId: String,
     val startedAt: Date,
     var baseline: BaselineMeasurement? = null,
+    var lockedCameraConfig: CameraConfiguration? = null,
     val references: MutableList<ReferenceMeasurement> = mutableListOf(),
     val samples: MutableList<SampleMeasurement> = mutableListOf()
 ) : Parcelable {

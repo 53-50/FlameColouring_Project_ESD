@@ -12,4 +12,9 @@
 
     <color name="text_dark">#111111</color>
     <color name="white">#FFFFFF</color>
+
+    <color name="camera_status_locked">#1B5E20</color>
+    <color name="camera_status_auto_frozen">#4E342E</color>
+    <color name="camera_status_auto_warning">#B71C1C</color>
+    <color name="camera_status_neutral">#424242</color>
 </resources>

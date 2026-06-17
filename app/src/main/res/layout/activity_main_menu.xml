@@ -5,89 +5,81 @@
     android:background="#ECECEC"
     android:padding="24dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:layout_gravity="center"
-            android:background="@drawable/bg_screen_panel"
-            android:orientation="vertical"
-            android:paddingStart="24dp"
-            android:paddingTop="18dp"
-            android:paddingEnd="24dp"
-            android:paddingBottom="18dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_screen_panel"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/imgLogo"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:contentDescription="@string/logo_desc"
                 android:src="@mipmap/ic_launcher" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
+                android:layout_marginStart="14dp"
                 android:layout_weight="1"
-                android:text="@string/select_recording_type"
-                android:textColor="@color/text_dark"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_card"
-                android:gravity="center"
-                android:text="@string/info_symbol"
-                android:textColor="@color/text_dark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_recording_type"
+                    android:textColor="@color/text_dark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvCameraInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/camera_status_checking"
+                    android:textColor="@color/camera_status_neutral"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvCameraInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/camera_status_checking"
-            android:textColor="#555555"
-            android:textSize="12sp"
-            android:fontFamily="sans-serif-medium" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="18dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
+                    android:layout_marginBottom="12dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/btnRecordBaseline"
                         android:layout_width="170dp"
-                        android:layout_height="42dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/bg_button_orange"
                         android:text="@string/btn_record_baseline"
                         android:textAllCaps="false"
@@ -100,8 +92,8 @@
                     <Button
                         android:id="@+id/btnViewBaseline"
                         android:layout_width="72dp"
-                        android:layout_height="42dp"
-                        android:background="@drawable/bg_button_green"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_button_gray"
                         android:text="@string/btn_view"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
@@ -111,14 +103,14 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
+                    android:layout_marginBottom="12dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/btnRecordReference"
                         android:layout_width="170dp"
-                        android:layout_height="42dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/bg_button_orange"
                         android:text="@string/btn_record_reference"
                         android:textAllCaps="false"
@@ -131,8 +123,8 @@
                     <Button
                         android:id="@+id/btnViewReference"
                         android:layout_width="72dp"
-                        android:layout_height="42dp"
-                        android:background="@drawable/bg_button_green"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_button_gray"
                         android:text="@string/btn_view"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
@@ -148,7 +140,7 @@
                     <Button
                         android:id="@+id/btnRecordSample"
                         android:layout_width="170dp"
-                        android:layout_height="42dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/bg_button_orange"
                         android:text="@string/btn_record_sample"
                         android:textAllCaps="false"
@@ -161,9 +153,8 @@
                     <Button
                         android:id="@+id/btnViewSample"
                         android:layout_width="72dp"
-                        android:layout_height="42dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/bg_button_gray"
-                        android:enabled="true"
                         android:text="@string/btn_view"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
@@ -172,55 +163,56 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="150dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:gravity="center_horizontal"
                 android:orientation="vertical">
 
                 <Button
                     android:id="@+id/btnCompare"
-                    android:layout_width="120dp"
-                    android:layout_height="44dp"
-                    android:layout_marginBottom="14dp"
+                    android:layout_width="118dp"
+                    android:layout_height="40dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_button_yellow"
                     android:text="@string/btn_comp"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/btnLoadDemo"
-                        android:layout_width="120dp"
-                        android:layout_height="44dp"
-                        android:layout_marginBottom="14dp"
-                        android:background="@drawable/bg_button_orange"
-                        android:text="Demo"
-                        android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <Button
+                    android:id="@+id/btnLoadDemo"
+                    android:layout_width="118dp"
+                    android:layout_height="40dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/bg_button_orange"
+                    android:text="Demo"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/btnExport"
-                    android:layout_width="120dp"
-                    android:layout_height="44dp"
-                    android:layout_marginBottom="14dp"
+                    android:layout_width="118dp"
+                    android:layout_height="40dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_button_green"
                     android:text="@string/btn_export"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    android:textSize="16sp" />
 
                 <Button
                     android:id="@+id/btnQuit"
-                    android:layout_width="120dp"
-                    android:layout_height="44dp"
+                    android:layout_width="118dp"
+                    android:layout_height="40dp"
                     android:background="@drawable/bg_button_red"
                     android:text="@string/btn_quit"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

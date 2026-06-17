@@ -20,7 +20,6 @@ import at.hcw.flaminco.model.MeasurementVector
 import at.hcw.flaminco.model.ReferenceMeasurement
 import at.hcw.flaminco.model.RegionOfInterest
 import at.hcw.flaminco.model.SampleMeasurement
-import androidx.core.graphics.toColorInt
 import at.hcw.flaminco.model.CameraCapabilities
 import at.hcw.flaminco.model.ZonedMeasurementVectors
 import java.io.File
@@ -112,6 +111,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateButtonStates()
+        displayCameraStatus()
     }
 
     private fun updateButtonStates() {
@@ -121,13 +121,13 @@ class MainActivity : AppCompatActivity() {
 
         // Step 1: Baseline is the entry point
         updateButton(btnRecordBaseline, true)
-        updateButton(btnViewBaseline, hasBaseline)
+        updateViewButton(btnViewBaseline, hasBaseline)
 
         // Step 2: Reference and Sample require a baseline (FR-M-5 / FR-M-19)
         updateButton(btnRecordReference, hasBaseline)
-        updateButton(btnViewReference, hasRef)
+        updateViewButton(btnViewReference, hasRef)
         updateButton(btnRecordSample, hasBaseline)
-        updateButton(btnViewSample, hasSample)
+        updateViewButton(btnViewSample, hasSample)
 
         // Step 3: Comparison requires at least one of each
         updateButton(btnCompare, hasRef && hasSample)
@@ -139,6 +139,14 @@ class MainActivity : AppCompatActivity() {
         button.alpha = if (enabled) 1.0f else 0.4f
     }
 
+    private fun updateViewButton(button: Button, hasData: Boolean) {
+        button.isEnabled = hasData
+        button.alpha = if (hasData) 1.0f else 0.4f
+        button.setBackgroundResource(
+            if (hasData) R.drawable.bg_button_green else R.drawable.bg_button_gray
+        )
+    }
+
     private fun displayCameraStatus() {
         val manager = getSystemService(CAMERA_SERVICE) as CameraManager
         try {
@@ -146,17 +154,24 @@ class MainActivity : AppCompatActivity() {
             val chars = manager.getCameraCharacteristics(cameraId)
             val supportsManual = CameraCapabilities.supportsManualSensor(chars)
 
-            val config = CameraConfiguration.standard()
+            val config = CameraSessionSetup.sessionLockedConfig()
+                ?: DataManager.baseline?.cameraConfig
+                ?: CameraConfiguration.standard()
             if (supportsManual) {
                 val expMs = config.exposureTime / 1_000_000
                 tvCameraInfo.text = getString(R.string.camera_status_locked, config.iso, expMs)
-                tvCameraInfo.setTextColor("#2E7D32".toColorInt()) // Green for locked/safe
+                tvCameraInfo.setTextColor(getColor(R.color.camera_status_locked))
+            } else if (config.isAutoFrozen()) {
+                val expMs = config.exposureTime / 1_000_000
+                tvCameraInfo.text = getString(R.string.camera_status_auto_frozen, config.iso, expMs)
+                tvCameraInfo.setTextColor(getColor(R.color.camera_status_auto_frozen))
             } else {
                 tvCameraInfo.text = getString(R.string.camera_status_auto)
-                tvCameraInfo.setTextColor("#C62828".toColorInt()) // Red for warning
+                tvCameraInfo.setTextColor(getColor(R.color.camera_status_auto_warning))
             }
         } catch (e: Exception) {
             tvCameraInfo.text = getString(R.string.camera_status_unavailable)
+            tvCameraInfo.setTextColor(getColor(R.color.camera_status_neutral))
             e.printStackTrace()
         }
     }
@@ -244,6 +259,7 @@ class MainActivity : AppCompatActivity() {
             vector = baselineVector,
             zoneVectors = createZoneVectors(baselineVector)
         )
+        CameraSessionSetup.lockForSession(cameraConfig)
 
         listOf(
             "Barium" to createVector(80.0, 210.0, 80.0),

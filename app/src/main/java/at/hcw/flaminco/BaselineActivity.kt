@@ -29,6 +29,8 @@ class BaselineActivity : AppCompatActivity() {
     private var backgroundThread: HandlerThread? = null
     private var backgroundHandler: Handler? = null
     private var useManualCameraControls = false
+    private var activeCameraConfig: CameraConfiguration? = null
+    private var isCameraReady = false
 
     private var isRecording = false
     private val recordedFrames = mutableListOf<MeasurementData>()
@@ -95,6 +97,7 @@ class BaselineActivity : AppCompatActivity() {
     }
 
     private fun startRecording() {
+        if (!isCameraReady) return
         btnRecord.isEnabled = false
         MeasurementSequencer(
             statusTextView = tvStatus,
@@ -131,12 +134,17 @@ class BaselineActivity : AppCompatActivity() {
                 intensityMax = maxOf(avgR, avgG, avgB).toDouble()
             )
 
+            val cameraConfig = activeCameraConfig ?: CameraSessionSetup.previewConfiguration(useManualCameraControls)
+            if (CameraSessionSetup.shouldLockForSession(useManualCameraControls, cameraConfig)) {
+                CameraSessionSetup.lockForSession(cameraConfig)
+            }
+
             DataManager.baseline = BaselineMeasurement(
                 id = UUID.randomUUID().toString(),
                 timestamp = Date(),
                 durationSec = 3,
                 roi = currentRegionOfInterest(),
-                cameraConfig = CameraConfiguration.standard(),
+                cameraConfig = cameraConfig,
                 rawFrames = emptyList(),
                 featureSets = recordedFeatureSets(),
                 vector = vector,
@@ -306,26 +314,29 @@ class BaselineActivity : AppCompatActivity() {
         val texture = textureView.surfaceTexture ?: return
         texture.setDefaultBufferSize(1920, 1080)
         val surface = Surface(texture)
-        val builder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW) ?: return
-        builder.addTarget(surface)
+        val device = cameraDevice ?: return
+        val handler = backgroundHandler ?: return
 
-        // FR-M-12: Lock camera parameters when the device supports manual control.
-        val cameraConfig = CameraConfiguration.standard()
-        if (useManualCameraControls) {
-            cameraConfig.applyTo(builder)
-        } else {
-            cameraConfig.applyAutoTo(builder)
-        }
+        isCameraReady = false
+        runOnUiThread { btnRecord.isEnabled = false }
 
-        cameraDevice?.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
-            override fun onConfigured(session: CameraCaptureSession) {
-                captureSession = session
-                try {
-                    captureSession?.setRepeatingRequest(builder.build(), null, backgroundHandler)
-                } catch (e: Exception) { e.printStackTrace() }
-            }
-            override fun onConfigureFailed(session: CameraCaptureSession) {}
-        }, null)
+        CameraPreviewSession.start(
+            cameraDevice = device,
+            surface = surface,
+            useManualCameraControls = useManualCameraControls,
+            backgroundHandler = handler,
+            callbacks = CameraPreviewSession.Callbacks(
+                onSessionConfigured = { captureSession = it },
+                onConfigUpdated = { activeCameraConfig = it },
+                onPreviewReady = {
+                    isCameraReady = true
+                    btnRecord.isEnabled = true
+                },
+                onStatusMessage = { message ->
+                    tvStatus.text = message
+                }
+            )
+        )
     }
 
     private fun startBackgroundThread() {

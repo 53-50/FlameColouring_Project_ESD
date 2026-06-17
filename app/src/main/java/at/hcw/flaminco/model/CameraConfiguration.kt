@@ -2,6 +2,7 @@ package at.hcw.flaminco.model
 
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -21,6 +22,7 @@ data class CameraConfiguration(
         const val STANDARD_EXPOSURE_NS = 20000000L // 20ms
         const val STANDARD_WB = "OFF"
         const val STANDARD_FOCUS = "OFF"
+        const val WB_AUTO_FROZEN = "AUTO_FROZEN"
         const val RES_WIDTH = 1920
         const val RES_HEIGHT = 1080
 
@@ -56,6 +58,31 @@ data class CameraConfiguration(
     fun applyAutoTo(builder: CaptureRequest.Builder) {
         builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
         builder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO)
+    }
+
+    /** Auto exposure/WB while the camera stabilizes before locking (FR-M-12 fallback). */
+    fun applyAutoStabilizingTo(builder: CaptureRequest.Builder) {
+        applyAutoTo(builder)
+        builder.set(CaptureRequest.CONTROL_AE_LOCK, false)
+        builder.set(CaptureRequest.CONTROL_AWB_LOCK, false)
+    }
+
+    /** Freezes current auto exposure and white balance values (FR-M-12 fallback). */
+    fun applyAutoFrozenTo(builder: CaptureRequest.Builder) {
+        builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
+        builder.set(CaptureRequest.CONTROL_AE_LOCK, true)
+        builder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO)
+        builder.set(CaptureRequest.CONTROL_AWB_LOCK, true)
+    }
+
+    fun isAutoFrozen(): Boolean = whiteBalanceMode == WB_AUTO_FROZEN
+
+    /** Uses sensor-reported values when manual controls are active (FR-M-12). */
+    fun withActualSensorValues(result: CaptureResult, markAutoFrozen: Boolean = false): CameraConfiguration {
+        val actualIso = result.get(CaptureResult.SENSOR_SENSITIVITY) ?: iso
+        val actualExposure = result.get(CaptureResult.SENSOR_EXPOSURE_TIME) ?: exposureTime
+        val wbMode = if (markAutoFrozen || isAutoFrozen()) WB_AUTO_FROZEN else whiteBalanceMode
+        return copy(iso = actualIso, exposureTime = actualExposure, whiteBalanceMode = wbMode)
     }
 }
 
