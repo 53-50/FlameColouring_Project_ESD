@@ -14,10 +14,14 @@
     <string name="btn_record_sample">Record Sample</string>
     <string name="btn_comp">Comp.</string>
     <string name="btn_export">Export</string>
+    <string name="btn_load_demo">Demo</string>
     <string name="btn_quit">Quit</string>
     <string name="status_starting_in">Status: Starting in %1$d&#8230;</string>
     <string name="status_recording">Status: Recording&#8230;</string>
 
+    <string name="measurement_duration_label">Measurement duration:</string>
+    <string name="startup_duration_label">Startup countdown:</string>
+    <string name="measurement_duration_seconds">%1$d s</string>
     <string name="camera_permission_title">Camera Access Required</string>
     <string name="camera_permission_message">This app uses the camera to analyze flame colors spectroscopically. Without camera access, measurements cannot be performed.</string>
     <string name="camera_permission_understood">Continue</string>

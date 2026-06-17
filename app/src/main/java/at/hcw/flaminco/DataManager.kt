@@ -20,11 +20,21 @@ object DataManager {
     
     val references get() = session.references
     val samples get() = session.samples
+    var measurementDurationSec: Int
+        get() = session.measurementDurationSec
+        set(value) { session.measurementDurationSec = MeasurementSession.normalizeMeasurementDuration(value) }
+    var startupDurationSec: Int
+        get() = session.startupDurationSec
+        set(value) { session.startupDurationSec = MeasurementSession.normalizeStartupDuration(value) }
 
     fun resetSession() {
+        val duration = session.measurementDurationSec
+        val startupDuration = session.startupDurationSec
         session = MeasurementSession(
             sessionId = UUID.randomUUID().toString(),
-            startedAt = Date()
+            startedAt = Date(),
+            measurementDurationSec = duration,
+            startupDurationSec = startupDuration
         )
     }
 }

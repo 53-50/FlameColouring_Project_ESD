@@ -41,6 +41,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnLoadDemo: Button
     private lateinit var btnExport: Button
     private lateinit var btnQuit: Button
+    private lateinit var btnDuration1: Button
+    private lateinit var btnDuration2: Button
+    private lateinit var btnDuration3: Button
+    private lateinit var btnStartup5: Button
+    private lateinit var btnStartup10: Button
+    private lateinit var btnStartup15: Button
     private lateinit var tvCameraInfo: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +69,16 @@ class MainActivity : AppCompatActivity() {
         btnLoadDemo = findViewById(R.id.btnLoadDemo)
         btnExport = findViewById(R.id.btnExport)
         btnQuit = findViewById(R.id.btnQuit)
+        btnDuration1 = findViewById(R.id.btnDuration1)
+        btnDuration2 = findViewById(R.id.btnDuration2)
+        btnDuration3 = findViewById(R.id.btnDuration3)
+        btnStartup5 = findViewById(R.id.btnStartup5)
+        btnStartup10 = findViewById(R.id.btnStartup10)
+        btnStartup15 = findViewById(R.id.btnStartup15)
         tvCameraInfo = findViewById(R.id.tvCameraInfo)
 
+        initDurationSelector()
+        initStartupDurationSelector()
         displayCameraStatus()
 
         btnRecordBaseline.setOnClickListener {
@@ -108,8 +122,63 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initDurationSelector() {
+        btnDuration1.text = getString(R.string.measurement_duration_seconds, 1)
+        btnDuration2.text = getString(R.string.measurement_duration_seconds, 2)
+        btnDuration3.text = getString(R.string.measurement_duration_seconds, 3)
+
+        btnDuration1.setOnClickListener { setMeasurementDuration(1) }
+        btnDuration2.setOnClickListener { setMeasurementDuration(2) }
+        btnDuration3.setOnClickListener { setMeasurementDuration(3) }
+        updateDurationSelectorUi()
+    }
+
+    private fun initStartupDurationSelector() {
+        btnStartup5.text = getString(R.string.measurement_duration_seconds, 5)
+        btnStartup10.text = getString(R.string.measurement_duration_seconds, 10)
+        btnStartup15.text = getString(R.string.measurement_duration_seconds, 15)
+
+        btnStartup5.setOnClickListener { setStartupDuration(5) }
+        btnStartup10.setOnClickListener { setStartupDuration(10) }
+        btnStartup15.setOnClickListener { setStartupDuration(15) }
+        updateStartupDurationSelectorUi()
+    }
+
+    private fun setStartupDuration(seconds: Int) {
+        DataManager.startupDurationSec = seconds
+        updateStartupDurationSelectorUi()
+    }
+
+    private fun updateStartupDurationSelectorUi() {
+        val selected = DataManager.startupDurationSec
+        updateDurationButton(btnStartup5, selected == 5)
+        updateDurationButton(btnStartup10, selected == 10)
+        updateDurationButton(btnStartup15, selected == 15)
+    }
+
+    private fun setMeasurementDuration(seconds: Int) {
+        DataManager.measurementDurationSec = seconds
+        updateDurationSelectorUi()
+    }
+
+    private fun updateDurationSelectorUi() {
+        val selected = DataManager.measurementDurationSec
+        updateDurationButton(btnDuration1, selected == 1)
+        updateDurationButton(btnDuration2, selected == 2)
+        updateDurationButton(btnDuration3, selected == 3)
+    }
+
+    private fun updateDurationButton(button: Button, selected: Boolean) {
+        button.setBackgroundResource(
+            if (selected) R.drawable.bg_button_orange else R.drawable.bg_button_gray
+        )
+        button.alpha = if (selected) 1.0f else 0.75f
+    }
+
     override fun onResume() {
         super.onResume()
+        updateDurationSelectorUi()
+        updateStartupDurationSelectorUi()
         updateButtonStates()
         displayCameraStatus()
     }
@@ -304,7 +373,7 @@ class MainActivity : AppCompatActivity() {
         DataManager.baseline = BaselineMeasurement(
             id = UUID.randomUUID().toString(),
             timestamp = Date(),
-            durationSec = 2,
+            durationSec = DataManager.measurementDurationSec,
             roi = roi,
             cameraConfig = cameraConfig,
             rawFrames = emptyList(),
@@ -325,7 +394,7 @@ class MainActivity : AppCompatActivity() {
                 ReferenceMeasurement(
                     id = UUID.randomUUID().toString(),
                     timestamp = Date(),
-                    durationSec = 2,
+                    durationSec = DataManager.measurementDurationSec,
                     roi = roi,
                     cameraConfig = cameraConfig,
                     rawFrames = emptyList(),
@@ -346,7 +415,7 @@ class MainActivity : AppCompatActivity() {
                 SampleMeasurement(
                     id = UUID.randomUUID().toString(),
                     timestamp = Date(),
-                    durationSec = 2,
+                    durationSec = DataManager.measurementDurationSec,
                     roi = roi,
                     cameraConfig = cameraConfig,
                     rawFrames = emptyList(),

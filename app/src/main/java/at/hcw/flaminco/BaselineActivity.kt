@@ -101,6 +101,8 @@ class BaselineActivity : AppCompatActivity() {
         btnRecord.isEnabled = false
         MeasurementSequencer(
             statusTextView = tvStatus,
+            startupDurationSec = DataManager.startupDurationSec,
+            recordingDurationSec = DataManager.measurementDurationSec,
             onStartRecording = {
                 isRecording = true
                 recordedFrames.clear()
@@ -142,7 +144,7 @@ class BaselineActivity : AppCompatActivity() {
             DataManager.baseline = BaselineMeasurement(
                 id = UUID.randomUUID().toString(),
                 timestamp = Date(),
-                durationSec = 3,
+                durationSec = DataManager.measurementDurationSec,
                 roi = currentRegionOfInterest(),
                 cameraConfig = cameraConfig,
                 rawFrames = emptyList(),

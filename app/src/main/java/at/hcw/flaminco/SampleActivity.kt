@@ -115,6 +115,8 @@ class SampleActivity : AppCompatActivity() {
         btnRecord.isEnabled = false
         MeasurementSequencer(
             statusTextView = tvStatus,
+            startupDurationSec = DataManager.startupDurationSec,
+            recordingDurationSec = DataManager.measurementDurationSec,
             onStartRecording = {
                 isRecording = true
                 recordedFrames.clear()
@@ -176,7 +178,7 @@ class SampleActivity : AppCompatActivity() {
                 val sampleMeasurement = SampleMeasurement(
                     id = UUID.randomUUID().toString(),
                     timestamp = Date(),
-                    durationSec = 3,
+                    durationSec = DataManager.measurementDurationSec,
                     roi = currentRegionOfInterest(),
                     cameraConfig = activeCameraConfig ?: CameraSessionSetup.previewConfiguration(useManualCameraControls),
                     rawFrames = emptyList(),
