@@ -35,6 +35,7 @@ class SampleActivity : AppCompatActivity() {
     private var isRecording = false
     private val recordedFrames = mutableListOf<MeasurementData>()
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var lastAnalyzedRoi: Rect? = null
 
     // Messfenster vertikal gestreckt (mehr Daten in der Höhe)
     private val ROI_WIDTH = 200
@@ -107,6 +108,7 @@ class SampleActivity : AppCompatActivity() {
         
         isRecording = true
         recordedFrames.clear()
+        lastAnalyzedRoi = null
         btnRecord.isEnabled = false
         tvStatus.text = "Status: Recording Sample..."
         
@@ -163,7 +165,7 @@ class SampleActivity : AppCompatActivity() {
                     id = UUID.randomUUID().toString(),
                     timestamp = Date(),
                     durationSec = 2,
-                    roi = RegionOfInterest(0, 0, ROI_WIDTH, ROI_HEIGHT),
+                    roi = currentRegionOfInterest(),
                     cameraConfig = CameraConfiguration.standard(),
                     rawFrames = emptyList(),
                     featureSets = emptyList(),
@@ -187,6 +189,7 @@ class SampleActivity : AppCompatActivity() {
     private fun analyzeFrame() {
         val bitmap = textureView.bitmap ?: return
         val roi = calculateBitmapRoi(bitmap)
+        lastAnalyzedRoi = roi
         
         var sumR = 0L
         var sumG = 0L
@@ -235,6 +238,11 @@ class SampleActivity : AppCompatActivity() {
         val bottom = ((overlayTopInTexture + roiOverlay.height) * scaleY).toInt().coerceIn(top + 1, bitmap.height)
 
         return if (right > left && bottom > top) Rect(left, top, right, bottom) else fallback
+    }
+
+    private fun currentRegionOfInterest(): RegionOfInterest {
+        val roi = lastAnalyzedRoi ?: Rect(0, 0, ROI_WIDTH, ROI_HEIGHT)
+        return RegionOfInterest(roi.left, roi.top, roi.width(), roi.height())
     }
 
     private fun centeredFallbackRoi(bitmap: Bitmap): Rect {
