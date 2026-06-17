@@ -35,9 +35,11 @@ class ComparisonActivity : AppCompatActivity() {
         setContentView(R.layout.activity_comparison)
 
         val tvStatus = findViewById<TextView>(R.id.tvComparisonResult)
-        val container = findViewById<LinearLayout>(R.id.llMatchesContainer)
+        val matchesContainer = findViewById<LinearLayout>(R.id.llMatchesContainer)
+        val samplesContainer = findViewById<LinearLayout>(R.id.llSamplesContainer)
         val btnBack = findViewById<Button>(R.id.btnBackComparison)
         val viewSampleColor = findViewById<View>(R.id.viewSampleColor)
+        val tvSelectedSampleTitle = findViewById<TextView>(R.id.tvSelectedSampleTitle)
         val tvSampleDetails = findViewById<TextView>(R.id.tvSampleDetails)
 
         val samples = DataManager.samples
@@ -47,28 +49,33 @@ class ComparisonActivity : AppCompatActivity() {
             tvStatus.text = "Missing Data:\nPlease record at least one Reference and one Sample."
             tvStatus.visibility = View.VISIBLE
         } else {
-            tvStatus.visibility = View.GONE
-            val lastSample = samples.last()
-            
-            // Update Sample UI
-            val sv = lastSample.vector
-            val sr = sv.values[0].toInt()
-            val sg = sv.values[1].toInt()
-            val sb = sv.values[2].toInt()
-            viewSampleColor.setBackgroundColor(Color.rgb(sr, sg, sb))
-            tvSampleDetails.text = String.format(Locale.US, 
-                "H: %.1f° | S: %.2f | V: %.2f\nRGB: (%d, %d, %d)", 
-                sv.meanHue, sv.meanSaturation, sv.meanValue, sr, sg, sb)
-
-            // Calculate Matches
-            val matches = calculateMatches(lastSample, refs)
-            
-            // Display Top 3
             val inflater = LayoutInflater.from(this)
-            matches.take(3).forEach { match ->
-                val card = createMatchCard(inflater, container, match)
-                container.addView(card)
+            var selectedSample = samples.first()
+
+            fun renderComparison() {
+                tvStatus.visibility = View.GONE
+                samplesContainer.removeAllViews()
+                matchesContainer.removeAllViews()
+
+                samples.forEach { sample ->
+                    val card = createSampleCard(inflater, samplesContainer, sample, sample == selectedSample)
+                    card.setOnClickListener {
+                        selectedSample = sample
+                        renderComparison()
+                    }
+                    samplesContainer.addView(card)
+                }
+
+                updateSelectedSampleUi(selectedSample, tvSelectedSampleTitle, viewSampleColor, tvSampleDetails)
+
+                val matches = calculateMatches(selectedSample, refs)
+                matches.forEach { match ->
+                    val card = createMatchCard(inflater, matchesContainer, match)
+                    matchesContainer.addView(card)
+                }
             }
+
+            renderComparison()
         }
 
         btnBack.setOnClickListener { finish() }
@@ -116,6 +123,74 @@ class ComparisonActivity : AppCompatActivity() {
 
         // Convert distance to similarity (1.0 = identical, 0.0 = completely different)
         return (1.0 - weightedDist).coerceIn(0.0, 1.0)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun createSampleCard(
+        inflater: LayoutInflater,
+        container: LinearLayout,
+        sample: SampleMeasurement,
+        isSelected: Boolean
+    ): View {
+        val view = inflater.inflate(R.layout.item_comparison_sample_card, container, false)
+        val tvName = view.findViewById<TextView>(R.id.tvComparisonSampleName)
+        val tvValues = view.findViewById<TextView>(R.id.tvComparisonSampleValues)
+        val colorPreview = view.findViewById<View>(R.id.viewComparisonSampleColor)
+
+        val v = sample.vector
+        val r = v.values[0].toInt()
+        val g = v.values[1].toInt()
+        val b = v.values[2].toInt()
+
+        tvName.text = sample.getProbableMatch() ?: "Sample"
+        tvValues.text = String.format(
+            Locale.US,
+            "RGB: (%d, %d, %d)\nH: %.1f° | S: %.2f | V: %.2f\nImean: %.1f | Imax: %.1f",
+            r,
+            g,
+            b,
+            v.meanHue,
+            v.meanSaturation,
+            v.meanValue,
+            v.intensityMean,
+            v.intensityMax
+        )
+        colorPreview.setBackgroundColor(Color.rgb(r, g, b))
+        view.alpha = if (isSelected) 1.0f else 0.55f
+
+        return view
+    }
+
+    private fun updateSelectedSampleUi(
+        sample: SampleMeasurement,
+        title: TextView,
+        colorView: View,
+        details: TextView
+    ) {
+        val v = sample.vector
+        val r = v.values[0].toInt()
+        val g = v.values[1].toInt()
+        val b = v.values[2].toInt()
+
+        title.text = "Selected Sample: ${sample.getProbableMatch() ?: "Sample"}"
+        colorView.setBackgroundColor(Color.rgb(r, g, b))
+        details.text = String.format(
+            Locale.US,
+            "RGB: (%d, %d, %d)\nH: %.1f° | S: %.2f | V: %.2f\nIntensity Mean: %.1f | Intensity Max: %.1f\nFrames: %d | ROI: %d,%d %dx%d",
+            r,
+            g,
+            b,
+            v.meanHue,
+            v.meanSaturation,
+            v.meanValue,
+            v.intensityMean,
+            v.intensityMax,
+            sample.featureSets.size,
+            sample.roi.x,
+            sample.roi.y,
+            sample.roi.width,
+            sample.roi.height
+        )
     }
 
     @SuppressLint("SetTextI18n")

@@ -12,7 +12,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="260dp"
+            android:layout_height="320dp"
             android:layout_gravity="center"
             android:background="@drawable/bg_screen_panel"
             android:orientation="vertical"
@@ -178,6 +178,18 @@
                         android:layout_marginBottom="14dp"
                         android:background="@drawable/bg_button_yellow"
                         android:text="Comp."
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnLoadDemo"
+                        android:layout_width="120dp"
+                        android:layout_height="44dp"
+                        android:layout_marginBottom="14dp"
+                        android:background="@drawable/bg_button_orange"
+                        android:text="Demo"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
                         android:textSize="18sp"

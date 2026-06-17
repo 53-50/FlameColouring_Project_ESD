@@ -3,6 +3,7 @@ package at.hcw.flaminco
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
@@ -10,8 +11,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import at.hcw.flaminco.model.BaselineMeasurement
+import at.hcw.flaminco.model.CameraConfiguration
+import at.hcw.flaminco.model.FrameFeatureSet
+import at.hcw.flaminco.model.MeasurementVector
+import at.hcw.flaminco.model.ReferenceMeasurement
+import at.hcw.flaminco.model.RegionOfInterest
+import at.hcw.flaminco.model.SampleMeasurement
 import java.io.File
 import java.io.FileWriter
+import java.util.Date
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnRecordSample: Button
     private lateinit var btnViewSample: Button
     private lateinit var btnCompare: Button
+    private lateinit var btnLoadDemo: Button
     private lateinit var btnExport: Button
     private lateinit var btnQuit: Button
 
@@ -44,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         btnRecordSample = findViewById(R.id.btnRecordSample)
         btnViewSample = findViewById(R.id.btnViewSample)
         btnCompare = findViewById(R.id.btnCompare)
+        btnLoadDemo = findViewById(R.id.btnLoadDemo)
         btnExport = findViewById(R.id.btnExport)
         btnQuit = findViewById(R.id.btnQuit)
 
@@ -73,6 +85,10 @@ class MainActivity : AppCompatActivity() {
 
         btnCompare.setOnClickListener {
             startActivity(Intent(this, ComparisonActivity::class.java))
+        }
+
+        btnLoadDemo.setOnClickListener {
+            loadDemoData()
         }
 
         btnExport.setOnClickListener {
@@ -175,6 +191,97 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Exported to ${file.absolutePath}", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             Toast.makeText(this, "Export failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun loadDemoData() {
+        DataManager.resetSession()
+
+        val roi = RegionOfInterest(440, 130, 200, 200)
+        val cameraConfig = CameraConfiguration.standard()
+        val baselineVector = createVector(18.0, 18.0, 16.0)
+
+        DataManager.baseline = BaselineMeasurement(
+            id = UUID.randomUUID().toString(),
+            timestamp = Date(),
+            durationSec = 2,
+            roi = roi,
+            cameraConfig = cameraConfig,
+            rawFrames = emptyList(),
+            featureSets = createFeatureSets(baselineVector),
+            vector = baselineVector
+        )
+
+        listOf(
+            "Barium" to createVector(80.0, 210.0, 80.0),
+            "Calcium" to createVector(255.0, 125.0, 55.0),
+            "Copper" to createVector(35.0, 205.0, 180.0),
+            "Sodium" to createVector(255.0, 220.0, 30.0),
+            "Strontium" to createVector(255.0, 55.0, 45.0)
+        ).forEach { (elementName, vector) ->
+            DataManager.session.addReference(
+                ReferenceMeasurement(
+                    id = UUID.randomUUID().toString(),
+                    timestamp = Date(),
+                    durationSec = 2,
+                    roi = roi,
+                    cameraConfig = cameraConfig,
+                    rawFrames = emptyList(),
+                    featureSets = createFeatureSets(vector),
+                    vector = vector,
+                    elementName = elementName
+                )
+            )
+        }
+
+        listOf(
+            "Demo Sample - Copper" to createVector(42.0, 198.0, 174.0),
+            "Demo Sample - Sodium" to createVector(250.0, 214.0, 38.0),
+            "Demo Sample - Strontium" to createVector(248.0, 64.0, 52.0)
+        ).forEach { (sampleName, vector) ->
+            DataManager.session.addSamples(
+                SampleMeasurement(
+                    id = UUID.randomUUID().toString(),
+                    timestamp = Date(),
+                    durationSec = 2,
+                    roi = roi,
+                    cameraConfig = cameraConfig,
+                    rawFrames = emptyList(),
+                    featureSets = createFeatureSets(vector),
+                    vector = vector
+                ).apply {
+                    setProbableMatch(sampleName)
+                }
+            )
+        }
+
+        updateButtonStates()
+        Toast.makeText(this, "Demo data loaded", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun createVector(r: Double, g: Double, b: Double): MeasurementVector {
+        val hsv = FloatArray(3)
+        Color.RGBToHSV(r.toInt(), g.toInt(), b.toInt(), hsv)
+        return MeasurementVector(
+            values = listOf(r, g, b),
+            meanHue = hsv[0].toDouble(),
+            meanSaturation = hsv[1].toDouble(),
+            meanValue = hsv[2].toDouble(),
+            intensityMean = (r + g + b) / 3.0,
+            intensityMax = maxOf(r, g, b)
+        )
+    }
+
+    private fun createFeatureSets(vector: MeasurementVector): List<FrameFeatureSet> {
+        return List(6) { index ->
+            FrameFeatureSet(
+                frameIndex = index,
+                meanChannel1 = vector.values[0],
+                meanChannel2 = vector.values[1],
+                meanChannel3 = vector.values[2],
+                intensityMean = vector.intensityMean,
+                intensityMax = vector.intensityMax
+            )
         }
     }
 }
