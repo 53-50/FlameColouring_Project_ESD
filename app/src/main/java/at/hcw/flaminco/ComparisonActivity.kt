@@ -150,10 +150,10 @@ class ComparisonActivity : AppCompatActivity() {
         sample: SampleMeasurement,
         isSelected: Boolean
     ): View {
-        val view = inflater.inflate(R.layout.item_comparison_sample_card, container, false)
-        val tvName = view.findViewById<TextView>(R.id.tvComparisonSampleName)
-        val tvValues = view.findViewById<TextView>(R.id.tvComparisonSampleValues)
-        val colorPreview = view.findViewById<View>(R.id.viewComparisonSampleColor)
+        val view = inflater.inflate(R.layout.item_sample_card, container, false)
+        val tvName = view.findViewById<TextView>(R.id.tvSampleName)
+        val tvValues = view.findViewById<TextView>(R.id.tvSampleValues)
+        val colorPreview = view.findViewById<View>(R.id.viewColorPreview)
 
         val v = sample.vector
         val r = v.values[0].toInt()

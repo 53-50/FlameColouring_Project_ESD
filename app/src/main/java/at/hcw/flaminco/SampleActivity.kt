@@ -104,23 +104,26 @@ class SampleActivity : AppCompatActivity() {
             Toast.makeText(this, "Please record a Baseline first!", Toast.LENGTH_LONG).show()
             return
         }
-        if (DataManager.session.isSampleLimitReached()) {
-            Toast.makeText(this, "Maximum of 3 samples reached.", Toast.LENGTH_LONG).show()
+        if (DataManager.session.isReferenceLimitReached()) { // bei Sample: isSampleLimitReached()
+            Toast.makeText(this, "Maximum of 5 references reached.", Toast.LENGTH_LONG).show()
             return
         }
-        
-        isRecording = true
-        recordedFrames.clear()
-        recordedTopFrames.clear()
-        recordedMiddleFrames.clear()
-        recordedBottomFrames.clear()
-        lastAnalyzedRoi = null
+
         btnRecord.isEnabled = false
-        tvStatus.text = "Status: Recording Sample..."
-        
-        mainHandler.postDelayed({
-            stopRecording()
-        }, 2000)
+        MeasurementSequencer(
+            statusTextView = tvStatus,
+            onStartRecording = {
+                isRecording = true
+                recordedFrames.clear()
+                recordedTopFrames.clear()
+                recordedMiddleFrames.clear()
+                recordedBottomFrames.clear()
+                lastAnalyzedRoi = null
+            },
+            onStopRecording = {
+                stopRecording()
+            }
+        ).start()
     }
 
     private fun stopRecording() {
@@ -170,7 +173,7 @@ class SampleActivity : AppCompatActivity() {
                 val sampleMeasurement = SampleMeasurement(
                     id = UUID.randomUUID().toString(),
                     timestamp = Date(),
-                    durationSec = 2,
+                    durationSec = 3,
                     roi = currentRegionOfInterest(),
                     cameraConfig = CameraConfiguration.standard(),
                     rawFrames = emptyList(),

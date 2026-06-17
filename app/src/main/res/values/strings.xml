@@ -14,4 +14,6 @@
     <string name="btn_comp">Comp.</string>
     <string name="btn_export">Export</string>
     <string name="btn_quit">Quit</string>
+    <string name="status_starting_in">Status: Starting in %1$d&#8230;</string>
+    <string name="status_recording">Status: Recording&#8230;</string>
 </resources>
