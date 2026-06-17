@@ -22,6 +22,7 @@ import at.hcw.flaminco.model.RegionOfInterest
 import at.hcw.flaminco.model.SampleMeasurement
 import androidx.core.graphics.toColorInt
 import at.hcw.flaminco.model.CameraCapabilities
+import at.hcw.flaminco.model.ZonedMeasurementVectors
 import java.io.File
 import java.io.FileWriter
 import java.util.Date
@@ -240,7 +241,8 @@ class MainActivity : AppCompatActivity() {
             cameraConfig = cameraConfig,
             rawFrames = emptyList(),
             featureSets = createFeatureSets(baselineVector),
-            vector = baselineVector
+            vector = baselineVector,
+            zoneVectors = createZoneVectors(baselineVector)
         )
 
         listOf(
@@ -260,6 +262,7 @@ class MainActivity : AppCompatActivity() {
                     rawFrames = emptyList(),
                     featureSets = createFeatureSets(vector),
                     vector = vector,
+                    zoneVectors = createZoneVectors(vector),
                     elementName = elementName
                 )
             )
@@ -279,7 +282,8 @@ class MainActivity : AppCompatActivity() {
                     cameraConfig = cameraConfig,
                     rawFrames = emptyList(),
                     featureSets = createFeatureSets(vector),
-                    vector = vector
+                    vector = vector,
+                    zoneVectors = createZoneVectors(vector)
                 ).apply {
                     setProbableMatch(sampleName)
                 }
@@ -314,5 +318,20 @@ class MainActivity : AppCompatActivity() {
                 intensityMax = vector.intensityMax
             )
         }
+    }
+
+    private fun createZoneVectors(vector: MeasurementVector): ZonedMeasurementVectors {
+        return ZonedMeasurementVectors(
+            top = scaledVector(vector, 0.9),
+            middle = scaledVector(vector, 1.05),
+            bottom = scaledVector(vector, 0.95)
+        )
+    }
+
+    private fun scaledVector(vector: MeasurementVector, factor: Double): MeasurementVector {
+        val r = (vector.values[0] * factor).coerceIn(0.0, 255.0)
+        val g = (vector.values[1] * factor).coerceIn(0.0, 255.0)
+        val b = (vector.values[2] * factor).coerceIn(0.0, 255.0)
+        return createVector(r, g, b)
     }
 }

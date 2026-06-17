@@ -13,7 +13,8 @@ data class BaselineMeasurement(
     override val cameraConfig: CameraConfiguration,
     override val rawFrames: List<FrameData>,
     override val featureSets: List<FrameFeatureSet>,
-    override val vector: MeasurementVector
+    override val vector: MeasurementVector,
+    override val zoneVectors: ZonedMeasurementVectors? = null
 ) : Measurement() {
     fun isValidBaseline(): Boolean {
         // Logic to determine if the baseline is valid (e.g., check noise levels)

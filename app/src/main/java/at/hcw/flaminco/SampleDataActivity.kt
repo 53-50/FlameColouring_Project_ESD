@@ -14,7 +14,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import at.hcw.flaminco.model.MeasurementVector
 import at.hcw.flaminco.model.SampleMeasurement
+import at.hcw.flaminco.model.ZonedMeasurementVectors
 
 class SampleDataActivity : AppCompatActivity() {
 
@@ -74,8 +76,11 @@ class SampleDataActivity : AppCompatActivity() {
         val b = v.values[2].toInt()
 
         tvValues.text = """
+            Overall ROI
             R: $r | G: $g | B: $b
             H: ${"%.1f".format(v.meanHue)}° S: ${"%.2f".format(v.meanSaturation)} V: ${"%.2f".format(v.meanValue)}
+            
+            ${formatZoneValues(data.zoneVectors)}
         """.trimIndent()
 
         colorPreview.setBackgroundColor(Color.rgb(r, g, b))
@@ -88,6 +93,21 @@ class SampleDataActivity : AppCompatActivity() {
         }
 
         return view
+    }
+
+    private fun formatZoneValues(zones: ZonedMeasurementVectors?): String {
+        if (zones == null) return "Zones: not available"
+        return """
+            Zones
+            Top: ${formatVector(zones.top)}
+            Middle: ${formatVector(zones.middle)}
+            Bottom: ${formatVector(zones.bottom)}
+        """.trimIndent()
+    }
+
+    private fun formatVector(v: MeasurementVector): String {
+        return "RGB(${v.values[0].toInt()}, ${v.values[1].toInt()}, ${v.values[2].toInt()}) " +
+            "H:${"%.1f".format(v.meanHue)} S:${"%.2f".format(v.meanSaturation)} V:${"%.2f".format(v.meanValue)}"
     }
 
     private fun showRenameDialog(data: SampleMeasurement) {

@@ -14,5 +14,6 @@ data class ReferenceMeasurement(
     override val rawFrames: List<FrameData>,
     override val featureSets: List<FrameFeatureSet>,
     override val vector: MeasurementVector,
+    override val zoneVectors: ZonedMeasurementVectors? = null,
     var elementName: String
 ) : Measurement()

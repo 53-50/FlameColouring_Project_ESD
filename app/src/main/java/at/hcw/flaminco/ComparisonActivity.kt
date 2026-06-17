@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import at.hcw.flaminco.model.MeasurementVector
 import at.hcw.flaminco.model.ReferenceMeasurement
 import at.hcw.flaminco.model.SampleMeasurement
 import java.util.Locale
@@ -98,9 +99,26 @@ class ComparisonActivity : AppCompatActivity() {
      * Uses weighted HSV distance with focus on Hue.
      */
     private fun calculateSimilarity(sample: SampleMeasurement, ref: ReferenceMeasurement): Double {
-        val v1 = sample.vector
-        val v2 = ref.vector
+        val sampleZones = sample.zoneVectors
+        val refZones = ref.zoneVectors
+        if (sampleZones != null && refZones != null) {
+            val fullScore = calculateVectorSimilarity(sample.vector, ref.vector)
+            val topScore = calculateVectorSimilarity(sampleZones.top, refZones.top)
+            val middleScore = calculateVectorSimilarity(sampleZones.middle, refZones.middle)
+            val bottomScore = calculateVectorSimilarity(sampleZones.bottom, refZones.bottom)
 
+            return (
+                fullScore * 0.5 +
+                    middleScore * 0.2 +
+                    topScore * 0.15 +
+                    bottomScore * 0.15
+                ).coerceIn(0.0, 1.0)
+        }
+
+        return calculateVectorSimilarity(sample.vector, ref.vector)
+    }
+
+    private fun calculateVectorSimilarity(v1: MeasurementVector, v2: MeasurementVector): Double {
         // Hue is circular (0-360). Calculate shortest distance.
         var dH = abs(v1.meanHue - v2.meanHue)
         if (dH > 180) dH = 360 - dH
@@ -176,7 +194,7 @@ class ComparisonActivity : AppCompatActivity() {
         colorView.setBackgroundColor(Color.rgb(r, g, b))
         details.text = String.format(
             Locale.US,
-            "RGB: (%d, %d, %d)\nH: %.1f° | S: %.2f | V: %.2f\nIntensity Mean: %.1f | Intensity Max: %.1f\nFrames: %d | ROI: %d,%d %dx%d",
+            "RGB: (%d, %d, %d)\nH: %.1f° | S: %.2f | V: %.2f\nIntensity Mean: %.1f | Intensity Max: %.1f\nFrames: %d | ROI: %d,%d %dx%d\n\n%s",
             r,
             g,
             b,
@@ -189,8 +207,24 @@ class ComparisonActivity : AppCompatActivity() {
             sample.roi.x,
             sample.roi.y,
             sample.roi.width,
-            sample.roi.height
+            sample.roi.height,
+            formatZoneValues(sample)
         )
+    }
+
+    private fun formatZoneValues(sample: SampleMeasurement): String {
+        val zones = sample.zoneVectors ?: return "Zones: not available"
+        return """
+            Zones used for similarity:
+            Top: ${formatVector(zones.top)}
+            Middle: ${formatVector(zones.middle)}
+            Bottom: ${formatVector(zones.bottom)}
+        """.trimIndent()
+    }
+
+    private fun formatVector(v: MeasurementVector): String {
+        return "RGB(${v.values[0].toInt()}, ${v.values[1].toInt()}, ${v.values[2].toInt()}) " +
+            "H:${"%.1f".format(v.meanHue)} S:${"%.2f".format(v.meanSaturation)} V:${"%.2f".format(v.meanValue)}"
     }
 
     @SuppressLint("SetTextI18n")

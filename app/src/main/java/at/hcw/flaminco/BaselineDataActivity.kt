@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import at.hcw.flaminco.model.MeasurementVector
+import at.hcw.flaminco.model.ZonedMeasurementVectors
 import java.util.*
 
 class BaselineDataActivity : AppCompatActivity() {
@@ -23,6 +25,7 @@ class BaselineDataActivity : AppCompatActivity() {
         if (data != null) {
             val v = data.vector
             tvValues.text = """
+                Overall ROI
                 Red (R): ${"%.2f".format(v.values[0])}
                 Green (G): ${"%.2f".format(v.values[1])}
                 Blue (B): ${"%.2f".format(v.values[2])}
@@ -32,6 +35,8 @@ class BaselineDataActivity : AppCompatActivity() {
                 Value (V): ${"%.2f".format(v.meanValue)}
                 
                 Timestamp: ${data.timestamp}
+                
+                ${formatZoneValues(data.zoneVectors)}
             """.trimIndent()
         } else {
             tvValues.text = "No baseline recorded yet.\nPlease go to 'Record Baseline' first."
@@ -40,5 +45,21 @@ class BaselineDataActivity : AppCompatActivity() {
         btnBack.setOnClickListener {
             finish()
         }
+    }
+
+    private fun formatZoneValues(zones: ZonedMeasurementVectors?): String {
+        if (zones == null) return "Zones: not available"
+        return """
+            Zone Values
+            Top: ${formatVector(zones.top)}
+            Middle: ${formatVector(zones.middle)}
+            Bottom: ${formatVector(zones.bottom)}
+        """.trimIndent()
+    }
+
+    private fun formatVector(v: MeasurementVector): String {
+        return "RGB(${v.values[0].toInt()}, ${v.values[1].toInt()}, ${v.values[2].toInt()}) " +
+            "H:${"%.1f".format(v.meanHue)} S:${"%.2f".format(v.meanSaturation)} V:${"%.2f".format(v.meanValue)} " +
+            "I:${"%.1f".format(v.intensityMean)}"
     }
 }

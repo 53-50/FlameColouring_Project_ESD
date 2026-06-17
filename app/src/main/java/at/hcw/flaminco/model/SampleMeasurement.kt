@@ -14,6 +14,7 @@ data class SampleMeasurement(
     override val rawFrames: List<FrameData>,
     override val featureSets: List<FrameFeatureSet>,
     override val vector: MeasurementVector,
+    override val zoneVectors: ZonedMeasurementVectors? = null,
     private var probableMatch: String? = null
 ) : Measurement() {
     fun setProbableMatch(name: String) {

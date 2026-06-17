@@ -13,4 +13,5 @@ abstract class Measurement : Parcelable {
     abstract val rawFrames: List<FrameData>
     abstract val featureSets: List<FrameFeatureSet>
     abstract val vector: MeasurementVector
+    abstract val zoneVectors: ZonedMeasurementVectors?
 }

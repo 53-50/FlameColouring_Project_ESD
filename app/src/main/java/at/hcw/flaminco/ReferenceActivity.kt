@@ -41,6 +41,9 @@ class ReferenceActivity : AppCompatActivity() {
 
     private var isRecording = false
     private val recordedFrames = mutableListOf<MeasurementData>()
+    private val recordedTopFrames = mutableListOf<MeasurementData>()
+    private val recordedMiddleFrames = mutableListOf<MeasurementData>()
+    private val recordedBottomFrames = mutableListOf<MeasurementData>()
     private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAnalyzedRoi: Rect? = null
 
@@ -112,6 +115,9 @@ class ReferenceActivity : AppCompatActivity() {
 
         isRecording = true
         recordedFrames.clear()
+        recordedTopFrames.clear()
+        recordedMiddleFrames.clear()
+        recordedBottomFrames.clear()
         lastAnalyzedRoi = null
         btnRecord.isEnabled = false
         tvStatus.text = "Status: Recording Reference..."
@@ -290,6 +296,7 @@ class ReferenceActivity : AppCompatActivity() {
             rawFrames = emptyList(),
             featureSets = recordedFeatureSets(),
             vector = vector,
+            zoneVectors = correctedZoneVectors(),
             elementName = elementName
         )
 
@@ -302,30 +309,13 @@ class ReferenceActivity : AppCompatActivity() {
         val bitmap = textureView.bitmap ?: return
         val roi = calculateBitmapRoi(bitmap)
         lastAnalyzedRoi = roi
-        
-        var sumR = 0L
-        var sumG = 0L
-        var sumB = 0L
-        var count = 0
+        val fullFrame = averageFrame(bitmap, roi, "Reference Frame") ?: return
+        val zones = splitRoiVertically(roi)
 
-        for (y in roi.top until roi.bottom) {
-            for (x in roi.left until roi.right) {
-                val pixel = bitmap.getPixel(x, y)
-                sumR += Color.red(pixel)
-                sumG += Color.green(pixel)
-                sumB += Color.blue(pixel)
-                count++
-            }
-        }
-
-        if (count == 0) return
-        val avgR = (sumR / count).toFloat()
-        val avgG = (sumG / count).toFloat()
-        val avgB = (sumB / count).toFloat()
-        val hsv = FloatArray(3)
-        Color.RGBToHSV(avgR.toInt(), avgG.toInt(), avgB.toInt(), hsv)
-        
-        recordedFrames.add(MeasurementData("Temp", avgR, avgG, avgB, hsv[0], hsv[1], hsv[2]))
+        recordedFrames.add(fullFrame)
+        averageFrame(bitmap, zones.top, "Reference Top")?.let { recordedTopFrames.add(it) }
+        averageFrame(bitmap, zones.middle, "Reference Middle")?.let { recordedMiddleFrames.add(it) }
+        averageFrame(bitmap, zones.bottom, "Reference Bottom")?.let { recordedBottomFrames.add(it) }
     }
 
     private fun calculateBitmapRoi(bitmap: Bitmap): Rect {
@@ -357,6 +347,46 @@ class ReferenceActivity : AppCompatActivity() {
         return RegionOfInterest(roi.left, roi.top, roi.width(), roi.height())
     }
 
+    private fun averageFrame(bitmap: Bitmap, roi: Rect, name: String): MeasurementData? {
+        var sumR = 0L
+        var sumG = 0L
+        var sumB = 0L
+        var count = 0
+
+        for (y in roi.top until roi.bottom) {
+            for (x in roi.left until roi.right) {
+                val pixel = bitmap.getPixel(x, y)
+                sumR += Color.red(pixel)
+                sumG += Color.green(pixel)
+                sumB += Color.blue(pixel)
+                count++
+            }
+        }
+
+        if (count == 0) return null
+
+        val avgR = (sumR / count).toFloat()
+        val avgG = (sumG / count).toFloat()
+        val avgB = (sumB / count).toFloat()
+        val hsv = FloatArray(3)
+        Color.RGBToHSV(avgR.toInt(), avgG.toInt(), avgB.toInt(), hsv)
+        return MeasurementData(name, avgR, avgG, avgB, hsv[0], hsv[1], hsv[2])
+    }
+
+    private data class RoiZones(
+        val top: Rect,
+        val middle: Rect,
+        val bottom: Rect
+    )
+
+    private fun splitRoiVertically(roi: Rect): RoiZones {
+        val zoneHeight = (roi.height() / 3).coerceAtLeast(1)
+        val top = Rect(roi.left, roi.top, roi.right, (roi.top + zoneHeight).coerceAtMost(roi.bottom))
+        val middle = Rect(roi.left, top.bottom, roi.right, (top.bottom + zoneHeight).coerceAtMost(roi.bottom))
+        val bottom = Rect(roi.left, middle.bottom, roi.right, roi.bottom)
+        return RoiZones(top, middle, bottom)
+    }
+
     private fun recordedFeatureSets(): List<FrameFeatureSet> {
         return recordedFrames.mapIndexed { index, frame ->
             FrameFeatureSet(
@@ -368,6 +398,40 @@ class ReferenceActivity : AppCompatActivity() {
                 intensityMax = maxOf(frame.r, frame.g, frame.b).toDouble()
             )
         }
+    }
+
+    private fun correctedZoneVectors(): ZonedMeasurementVectors? {
+        val zones = recordedZoneVectors() ?: return null
+        val baselineZones = DataManager.baseline?.zoneVectors ?: return zones
+        return zones.subtract(baselineZones)
+    }
+
+    private fun recordedZoneVectors(): ZonedMeasurementVectors? {
+        if (recordedTopFrames.isEmpty() || recordedMiddleFrames.isEmpty() || recordedBottomFrames.isEmpty()) {
+            return null
+        }
+
+        return ZonedMeasurementVectors(
+            top = vectorFromFrames(recordedTopFrames),
+            middle = vectorFromFrames(recordedMiddleFrames),
+            bottom = vectorFromFrames(recordedBottomFrames)
+        )
+    }
+
+    private fun vectorFromFrames(frames: List<MeasurementData>): MeasurementVector {
+        val avgR = frames.map { it.r }.average()
+        val avgG = frames.map { it.g }.average()
+        val avgB = frames.map { it.b }.average()
+        val hsv = FloatArray(3)
+        Color.RGBToHSV(avgR.toInt(), avgG.toInt(), avgB.toInt(), hsv)
+        return MeasurementVector(
+            values = listOf(avgR, avgG, avgB),
+            meanHue = hsv[0].toDouble(),
+            meanSaturation = hsv[1].toDouble(),
+            meanValue = hsv[2].toDouble(),
+            intensityMean = (avgR + avgG + avgB) / 3.0,
+            intensityMax = maxOf(avgR, avgG, avgB)
+        )
     }
 
     private fun centeredFallbackRoi(bitmap: Bitmap): Rect {
