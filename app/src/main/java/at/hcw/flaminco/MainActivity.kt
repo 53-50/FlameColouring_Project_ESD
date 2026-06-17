@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +20,8 @@ import at.hcw.flaminco.model.MeasurementVector
 import at.hcw.flaminco.model.ReferenceMeasurement
 import at.hcw.flaminco.model.RegionOfInterest
 import at.hcw.flaminco.model.SampleMeasurement
+import androidx.core.graphics.toColorInt
+import at.hcw.flaminco.model.CameraCapabilities
 import java.io.File
 import java.io.FileWriter
 import java.util.Date
@@ -25,7 +29,7 @@ import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
-    private val CAMERA_PERMISSION_CODE = 100
+    private val cameraPermissionCode = 100
 
     private lateinit var btnRecordBaseline: Button
     private lateinit var btnViewBaseline: Button
@@ -37,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnLoadDemo: Button
     private lateinit var btnExport: Button
     private lateinit var btnQuit: Button
+    private lateinit var tvCameraInfo: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +63,9 @@ class MainActivity : AppCompatActivity() {
         btnLoadDemo = findViewById(R.id.btnLoadDemo)
         btnExport = findViewById(R.id.btnExport)
         btnQuit = findViewById(R.id.btnQuit)
+        tvCameraInfo = findViewById(R.id.tvCameraInfo)
+
+        displayCameraStatus()
 
         btnRecordBaseline.setOnClickListener {
             startActivity(Intent(this, BaselineActivity::class.java))
@@ -130,6 +138,28 @@ class MainActivity : AppCompatActivity() {
         button.alpha = if (enabled) 1.0f else 0.4f
     }
 
+    private fun displayCameraStatus() {
+        val manager = getSystemService(CAMERA_SERVICE) as CameraManager
+        try {
+            val cameraId = manager.cameraIdList[0]
+            val chars = manager.getCameraCharacteristics(cameraId)
+            val supportsManual = CameraCapabilities.supportsManualSensor(chars)
+
+            val config = CameraConfiguration.standard()
+            if (supportsManual) {
+                val expMs = config.exposureTime / 1_000_000
+                tvCameraInfo.text = getString(R.string.camera_status_locked, config.iso, expMs)
+                tvCameraInfo.setTextColor("#2E7D32".toColorInt()) // Green for locked/safe
+            } else {
+                tvCameraInfo.text = getString(R.string.camera_status_auto)
+                tvCameraInfo.setTextColor("#C62828".toColorInt()) // Red for warning
+            }
+        } catch (e: Exception) {
+            tvCameraInfo.text = getString(R.string.camera_status_unavailable)
+            e.printStackTrace()
+        }
+    }
+
     private fun checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // FR-M-18: Explain the necessity of the camera before requesting permission
@@ -137,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("Kamerazugriff benötigt")
                 .setMessage("Diese App nutzt die Kamera, um Flammenfarben spektroskopisch zu analysieren. Ohne diesen Zugriff kann die Applikation nicht betrieben werden.")
                 .setPositiveButton("Verstanden") { _, _ ->
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), cameraPermissionCode)
                 }
                 .setNegativeButton("Beenden") { _, _ ->
                     finish()
@@ -149,7 +179,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_CODE) {
+        if (requestCode == cameraPermissionCode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Kamera bereit", Toast.LENGTH_SHORT).show()
             } else {
@@ -191,6 +221,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Exported to ${file.absolutePath}", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             Toast.makeText(this, "Export failed", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
         }
     }
 

@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">FlaMinCo</string>
+    <string name="camera_status_locked">Camera: LOCKED (ISO: %1$d, Exp: %2$dms, Focus: Fixed/Inf)</string>
+    <string name="camera_status_auto">Camera: AUTO (Manual Control Not Supported on this Device)</string>
+    <string name="camera_status_unavailable">Camera Status: Unavailable</string>
+    <string name="logo_desc">Logo</string>
+    <string name="select_recording_type">Select Recording Type:</string>
+    <string name="info_symbol">i</string>
+    <string name="camera_status_checking">Camera Status: Checking&#8230;</string>
+    <string name="btn_record_baseline">Record Baseline</string>
+    <string name="btn_view">VIEW</string>
+    <string name="btn_record_reference">Record Reference</string>
+    <string name="btn_record_sample">Record Sample</string>
+    <string name="btn_comp">Comp.</string>
+    <string name="btn_export">Export</string>
+    <string name="btn_quit">Quit</string>
 </resources>
