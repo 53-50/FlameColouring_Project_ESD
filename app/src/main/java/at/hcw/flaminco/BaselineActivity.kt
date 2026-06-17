@@ -32,7 +32,6 @@ class BaselineActivity : AppCompatActivity() {
 
     private var isRecording = false
     private val recordedFrames = mutableListOf<MeasurementData>()
-    private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAnalyzedRoi: Rect? = null
 
     // Erhöhtes Messfenster (vertikal gestreckt)
@@ -92,15 +91,17 @@ class BaselineActivity : AppCompatActivity() {
     }
 
     private fun startRecording() {
-        isRecording = true
-        recordedFrames.clear()
-        lastAnalyzedRoi = null
         btnRecord.isEnabled = false
-        tvStatus.text = "Status: Recording Baseline..."
-        
-        mainHandler.postDelayed({
-            stopRecording()
-        }, 2000)
+        MeasurementSequencer(
+            statusTextView = tvStatus,
+            onStartRecording = {
+                isRecording = true
+                recordedFrames.clear()
+            },
+            onStopRecording = {
+                stopRecording()
+            }
+        ).start()
     }
 
     private fun stopRecording() {
@@ -125,7 +126,7 @@ class BaselineActivity : AppCompatActivity() {
             DataManager.baseline = BaselineMeasurement(
                 id = UUID.randomUUID().toString(),
                 timestamp = Date(),
-                durationSec = 2,
+                durationSec = 3,
                 roi = currentRegionOfInterest(),
                 cameraConfig = CameraConfiguration.standard(),
                 rawFrames = emptyList(),

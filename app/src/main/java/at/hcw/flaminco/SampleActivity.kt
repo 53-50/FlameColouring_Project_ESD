@@ -34,7 +34,6 @@ class SampleActivity : AppCompatActivity() {
 
     private var isRecording = false
     private val recordedFrames = mutableListOf<MeasurementData>()
-    private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAnalyzedRoi: Rect? = null
 
     // Messfenster vertikal gestreckt (mehr Daten in der Höhe)
@@ -106,15 +105,18 @@ class SampleActivity : AppCompatActivity() {
             return
         }
         
-        isRecording = true
-        recordedFrames.clear()
-        lastAnalyzedRoi = null
         btnRecord.isEnabled = false
-        tvStatus.text = "Status: Recording Sample..."
-        
-        mainHandler.postDelayed({
-            stopRecording()
-        }, 2000)
+        MeasurementSequencer(
+            statusTextView = tvStatus,
+            onStartRecording = {
+                isRecording = true
+                recordedFrames.clear()
+                lastAnalyzedRoi = null
+            },
+            onStopRecording = {
+                stopRecording()
+            }
+        ).start()
     }
 
     private fun stopRecording() {
@@ -164,7 +166,7 @@ class SampleActivity : AppCompatActivity() {
                 val sampleMeasurement = SampleMeasurement(
                     id = UUID.randomUUID().toString(),
                     timestamp = Date(),
-                    durationSec = 2,
+                    durationSec = 3,
                     roi = currentRegionOfInterest(),
                     cameraConfig = CameraConfiguration.standard(),
                     rawFrames = emptyList(),

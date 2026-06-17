@@ -41,7 +41,6 @@ class ReferenceActivity : AppCompatActivity() {
 
     private var isRecording = false
     private val recordedFrames = mutableListOf<MeasurementData>()
-    private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAnalyzedRoi: Rect? = null
 
     // Messfenster vertikal gestreckt (mehr Daten in der Höhe)
@@ -110,15 +109,18 @@ class ReferenceActivity : AppCompatActivity() {
             return
         }
 
-        isRecording = true
-        recordedFrames.clear()
-        lastAnalyzedRoi = null
         btnRecord.isEnabled = false
-        tvStatus.text = "Status: Recording Reference..."
-        
-        mainHandler.postDelayed({
-            stopRecording()
-        }, 2000)
+        MeasurementSequencer(
+            statusTextView = tvStatus,
+            onStartRecording = {
+                isRecording = true
+                recordedFrames.clear()
+                lastAnalyzedRoi = null
+            },
+            onStopRecording = {
+                stopRecording()
+            }
+        ).start()
     }
 
     private fun stopRecording() {
@@ -284,7 +286,7 @@ class ReferenceActivity : AppCompatActivity() {
         val referenceMeasurement = ReferenceMeasurement(
             id = UUID.randomUUID().toString(),
             timestamp = Date(),
-            durationSec = 2,
+            durationSec = 3,
             roi = currentRegionOfInterest(),
             cameraConfig = CameraConfiguration.standard(),
             rawFrames = emptyList(),
