@@ -7,6 +7,7 @@ import android.hardware.camera2.*
 import android.os.*
 import android.view.Surface
 import android.view.TextureView
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
@@ -19,6 +20,7 @@ import java.util.*
 class BaselineActivity : AppCompatActivity() {
 
     private lateinit var textureView: TextureView
+    private lateinit var roiOverlay: View
     private lateinit var tvStatus: TextView
     private lateinit var btnRecord: Button
 
@@ -44,6 +46,7 @@ class BaselineActivity : AppCompatActivity() {
         setContentView(R.layout.activity_baseline)
 
         textureView = findViewById(R.id.cameraTextureView)
+        roiOverlay = findViewById(R.id.roiOverlay)
         tvStatus = findViewById(R.id.tvStatus)
         btnRecord = findViewById(R.id.btnStartRecord)
 
@@ -136,23 +139,15 @@ class BaselineActivity : AppCompatActivity() {
 
     private fun analyzeFrame() {
         val bitmap = textureView.bitmap ?: return
-        
-        val centerX = bitmap.width / 2
-        val centerY = bitmap.height / 2
-        
-        val startX = (centerX - ROI_WIDTH / 2).coerceAtLeast(0)
-        val startY = (centerY - ROI_HEIGHT / 2).coerceAtLeast(0)
+        val roi = calculateBitmapRoi(bitmap)
         
         var sumR = 0L
         var sumG = 0L
         var sumB = 0L
         var actualPixelCount = 0
 
-        val endY = (startY + ROI_HEIGHT).coerceAtMost(bitmap.height)
-        val endX = (startX + ROI_WIDTH).coerceAtMost(bitmap.width)
-
-        for (y in startY until endY) {
-            for (x in startX until endX) {
+        for (y in roi.top until roi.bottom) {
+            for (x in roi.left until roi.right) {
                 val pixel = bitmap.getPixel(x, y)
                 sumR += Color.red(pixel)
                 sumG += Color.green(pixel)
@@ -171,6 +166,40 @@ class BaselineActivity : AppCompatActivity() {
         Color.RGBToHSV(avgR.toInt(), avgG.toInt(), avgB.toInt(), hsv)
         
         recordedFrames.add(MeasurementData("Baseline Frame", avgR, avgG, avgB, hsv[0], hsv[1], hsv[2]))
+    }
+
+    private fun calculateBitmapRoi(bitmap: Bitmap): Rect {
+        val fallback = centeredFallbackRoi(bitmap)
+        if (textureView.width <= 0 || textureView.height <= 0 || roiOverlay.width <= 0 || roiOverlay.height <= 0) {
+            return fallback
+        }
+
+        val textureLocation = IntArray(2)
+        val overlayLocation = IntArray(2)
+        textureView.getLocationOnScreen(textureLocation)
+        roiOverlay.getLocationOnScreen(overlayLocation)
+
+        val overlayLeftInTexture = overlayLocation[0] - textureLocation[0]
+        val overlayTopInTexture = overlayLocation[1] - textureLocation[1]
+        val scaleX = bitmap.width.toFloat() / textureView.width.toFloat()
+        val scaleY = bitmap.height.toFloat() / textureView.height.toFloat()
+
+        val left = (overlayLeftInTexture * scaleX).toInt().coerceIn(0, bitmap.width - 1)
+        val top = (overlayTopInTexture * scaleY).toInt().coerceIn(0, bitmap.height - 1)
+        val right = ((overlayLeftInTexture + roiOverlay.width) * scaleX).toInt().coerceIn(left + 1, bitmap.width)
+        val bottom = ((overlayTopInTexture + roiOverlay.height) * scaleY).toInt().coerceIn(top + 1, bitmap.height)
+
+        return if (right > left && bottom > top) Rect(left, top, right, bottom) else fallback
+    }
+
+    private fun centeredFallbackRoi(bitmap: Bitmap): Rect {
+        val centerX = bitmap.width / 2
+        val centerY = bitmap.height / 2
+        val startX = (centerX - ROI_WIDTH / 2).coerceAtLeast(0)
+        val startY = (centerY - ROI_HEIGHT / 2).coerceAtLeast(0)
+        val endX = (startX + ROI_WIDTH).coerceAtMost(bitmap.width)
+        val endY = (startY + ROI_HEIGHT).coerceAtMost(bitmap.height)
+        return Rect(startX, startY, endX, endY)
     }
 
     @SuppressLint("MissingPermission")
