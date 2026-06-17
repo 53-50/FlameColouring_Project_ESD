@@ -1,5 +1,6 @@
 package at.hcw.flaminco.model
 
+import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CaptureRequest
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -47,5 +48,21 @@ data class CameraConfiguration(
         // Fix Focus (Manual/Infinity)
         builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
         builder.set(CaptureRequest.LENS_FOCUS_DISTANCE, 0.0f) // Infinity focus is often 0.0f
+    }
+
+    /**
+     * Falls manuelle Sensorsteuerung nicht unterstützt wird, bleibt die App lauffähig.
+     */
+    fun applyAutoTo(builder: CaptureRequest.Builder) {
+        builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
+        builder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO)
+    }
+}
+
+object CameraCapabilities {
+    fun supportsManualSensor(characteristics: CameraCharacteristics): Boolean {
+        val capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
+            ?: return false
+        return capabilities.contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR)
     }
 }

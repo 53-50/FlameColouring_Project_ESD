@@ -30,6 +30,7 @@ class ReferenceActivity : AppCompatActivity() {
     private var captureSession: CameraCaptureSession? = null
     private var backgroundThread: HandlerThread? = null
     private var backgroundHandler: Handler? = null
+    private var useManualCameraControls = false
 
     private var isRecording = false
     private val recordedFrames = mutableListOf<MeasurementData>()
@@ -247,6 +248,8 @@ class ReferenceActivity : AppCompatActivity() {
         val manager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
             val cameraId = manager.cameraIdList[0]
+            val characteristics = manager.getCameraCharacteristics(cameraId)
+            useManualCameraControls = CameraCapabilities.supportsManualSensor(characteristics)
             startBackgroundThread()
             manager.openCamera(cameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
@@ -263,17 +266,22 @@ class ReferenceActivity : AppCompatActivity() {
         val texture = textureView.surfaceTexture ?: return
         texture.setDefaultBufferSize(1920, 1080)
         val surface = Surface(texture)
-        val builder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-        builder?.addTarget(surface)
+        val builder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW) ?: return
+        builder.addTarget(surface)
 
-        // FR-M-12: Use centralized camera configuration to lock parameters
-        CameraConfiguration.standard().applyTo(builder!!)
+        // FR-M-12: Lock camera parameters when the device supports manual control.
+        val cameraConfig = CameraConfiguration.standard()
+        if (useManualCameraControls) {
+            cameraConfig.applyTo(builder)
+        } else {
+            cameraConfig.applyAutoTo(builder)
+        }
 
         cameraDevice?.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
             override fun onConfigured(session: CameraCaptureSession) {
                 captureSession = session
                 try {
-                    builder?.let { captureSession?.setRepeatingRequest(it.build(), null, backgroundHandler) }
+                    captureSession?.setRepeatingRequest(builder.build(), null, backgroundHandler)
                 } catch (e: Exception) { e.printStackTrace() }
             }
             override fun onConfigureFailed(session: CameraCaptureSession) {}
