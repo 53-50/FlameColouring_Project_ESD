@@ -150,8 +150,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun exportDataToCSV() {
-        if (DataManager.samples.isEmpty()) {
-            Toast.makeText(this, "No samples to export!", Toast.LENGTH_SHORT).show()
+        if (DataManager.references.isEmpty() && DataManager.samples.isEmpty()) {
+            Toast.makeText(this, "No measurements to export!", Toast.LENGTH_SHORT).show()
             return
         }
         try {
