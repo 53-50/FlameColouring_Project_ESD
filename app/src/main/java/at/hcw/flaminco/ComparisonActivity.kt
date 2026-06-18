@@ -47,7 +47,7 @@ class ComparisonActivity : AppCompatActivity() {
         val refs = DataManager.references
 
         if (samples.isEmpty() || refs.isEmpty()) {
-            tvStatus.text = "Missing Data:\nPlease record at least one Reference and one Sample."
+            tvStatus.setText(R.string.comparison_missing_data)
             tvStatus.visibility = View.VISIBLE
         } else {
             val inflater = LayoutInflater.from(this)

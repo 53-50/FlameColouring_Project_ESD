@@ -11,10 +11,21 @@ Die App soll Flammenbilder lokal auf einem Android-Gerät auswerten und unbekann
 - Kotlin
 - Android Studio
 - Android Views / XML
-- CameraX
-- OpenCV
+- Camera2 API (`TextureView`, manueller Sensor-Lock mit Auto-Freeze-Fallback)
+- HSV-Farbvektor-Analyse mit zonenbasierter ROI-Auswertung (kein OpenCV)
+- In-Memory-Session (`DataManager` / `MeasurementSession`)
 - CSV-Export
 - GitHub für Versionsverwaltung
+
+## Labor-Workflow (Session)
+
+1. **Baseline** — Flamme aus, nur Umgebungslicht in der ROI; danach Kamera-Lock für die Session
+2. **Reference** — bis zu 5 Elemente, baseline-korrigiert
+3. **Sample** — bis zu 3 Proben, baseline-korrigiert
+4. **Comparison** — gewichteter HSV-Vergleich (Full + Top/Middle/Bottom)
+5. **Export** — CSV mit Zonen-Spalte
+
+**Hinweis:** Beim erneuten Aufnehmen der Baseline werden vorhandene Referenzen und Proben verworfen (Warnung vorher). Session-Daten sind flüchtig — regelmäßig exportieren.
 
 ## Voraussetzungen
 
@@ -48,14 +59,20 @@ Für Kotlin selbst ist in der Regel nichts extra nötig, da Kotlin in Android St
 
 ## Projektstruktur
 
-Grobe Struktur:
-
 ```text
-app/
- └── src/main/
-      ├── java/.../ui
-      ├── java/.../camera
-      ├── java/.../analysis
-      ├── java/.../session
-      ├── java/.../export
-      └── res/
+app/src/main/java/at/hcw/flaminco/
+ ├── MainActivity.kt              # Hauptmenü, Export, Demo
+ ├── BaselineActivity.kt          # Baseline-Aufnahme
+ ├── ReferenceActivity.kt         # Referenz-Aufnahme
+ ├── SampleActivity.kt            # Proben-Aufnahme
+ ├── ComparisonActivity.kt        # Vergleich
+ ├── CameraPreviewSession.kt      # Kamera-Preview / Auto-Freeze
+ ├── CameraSessionSetup.kt        # Session-Kamera-Lock
+ ├── ZonedFrameCapture.kt         # ROI + Zonen-Frame-Analyse
+ ├── MeasurementSequencer.kt      # Countdown + Messfenster
+ ├── DataManager.kt               # Session-State
+ └── model/                       # Messdaten, Vektoren, Session
+app/src/main/res/
+ ├── layout/                      # UI-Layouts
+ └── values/strings.xml           # UI-Texte (Englisch)
+```

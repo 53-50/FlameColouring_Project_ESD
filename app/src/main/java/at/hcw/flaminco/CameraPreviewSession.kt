@@ -1,5 +1,6 @@
 package at.hcw.flaminco
 
+import android.content.Context
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CaptureRequest
@@ -24,6 +25,7 @@ object CameraPreviewSession {
     )
 
     fun start(
+        context: Context,
         cameraDevice: CameraDevice,
         surface: Surface,
         useManualCameraControls: Boolean,
@@ -48,10 +50,11 @@ object CameraPreviewSession {
             }
         } else {
             cameraConfig.applyAutoStabilizingTo(builder)
-            notifyStatus(callbacks, "Status: Stabilizing camera...")
+            notifyStatus(callbacks, context.getString(R.string.status_stabilizing_camera))
             createSession(cameraDevice, surface, builder, null, backgroundHandler, callbacks) { session ->
                 backgroundHandler.postDelayed({
                     applyAutoFreezeToSession(
+                        context = context,
                         captureSession = session,
                         cameraDevice = cameraDevice,
                         surface = surface,
@@ -65,6 +68,7 @@ object CameraPreviewSession {
     }
 
     fun applyAutoFreezeToSession(
+        context: Context,
         captureSession: CameraCaptureSession,
         cameraDevice: CameraDevice,
         surface: Surface,
@@ -86,7 +90,7 @@ object CameraPreviewSession {
                 if (!previewReadySent) {
                     previewReadySent = true
                     notifyPreviewReady(callbacks)
-                    notifyStatus(callbacks, "Status: Camera auto values frozen")
+                    notifyStatus(callbacks, context.getString(R.string.status_camera_auto_frozen))
                 }
             }
         )

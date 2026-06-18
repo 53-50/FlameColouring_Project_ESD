@@ -31,4 +31,55 @@
     <string name="camera_permission_ready">Camera ready</string>
     <string name="camera_permission_denied_title">Limited Functionality</string>
     <string name="camera_permission_denied_message">Without camera access, no measurements are possible. You can change this permission anytime in system settings.</string>
+
+    <!-- Baseline -->
+    <string name="status_baseline_ready">Status: Ready for Baseline</string>
+    <string name="status_baseline_saved">Status: Baseline Saved</string>
+    <string name="toast_baseline_captured">Baseline captured!</string>
+    <string name="btn_rerecord_baseline">RE-RECORD</string>
+    <string name="baseline_rerecord_title">Re-record Baseline?</string>
+    <string name="baseline_rerecord_message">References and samples were measured against the current baseline. Re-recording will remove all references and samples. Record the new baseline with the flame off and only ambient light in the ROI.</string>
+    <string name="action_continue">Continue</string>
+    <string name="baseline_invalid_title">Baseline Quality Warning</string>
+    <string name="baseline_invalid_message">The baseline looks too bright (mean intensity %1$.0f). Record again with the flame off and only ambient light inside the yellow frame.</string>
+
+    <!-- Shared recording / session -->
+    <string name="btn_start_baseline">START BASELINE</string>
+    <string name="btn_back">BACK</string>
+    <string name="error_baseline_required">Please record a Baseline first!</string>
+    <string name="error_capture_failed">Capture failed. No frames recorded.</string>
+    <string name="error_reference_limit">Maximum of 5 references reached.</string>
+    <string name="error_sample_limit">Maximum of 3 samples reached.</string>
+    <string name="btn_record_next_reference">RECORD NEXT</string>
+    <string name="btn_record_next_sample">RECORD NEXT SAMPLE</string>
+    <string name="action_save">Save</string>
+    <string name="action_discard">Discard</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="status_discarded">Status: Discarded</string>
+    <string name="status_stabilizing_camera">Status: Stabilizing camera&#8230;</string>
+    <string name="status_camera_auto_frozen">Status: Camera auto values frozen</string>
+
+    <!-- Reference -->
+    <string name="dialog_select_reference_title">Select Reference Element</string>
+    <string name="dialog_select_reference_message">The recording is finished. Choose the known element or use Other.</string>
+    <string name="dialog_other_element_title">Other Element</string>
+    <string name="hint_element_name">Element name</string>
+    <string name="status_saved_reference">Status: Saved %1$s</string>
+    <string name="toast_reference_added">%1$s added</string>
+
+    <!-- Sample -->
+    <string name="dialog_save_sample_title">Save Sample</string>
+    <string name="dialog_save_sample_message">Enter a name for this sample or discard the measurement.</string>
+    <string name="hint_sample_name">e.g. Probe A, Mixture 1&#8230;</string>
+    <string name="status_saved_sample">Status: Saved %1$s</string>
+    <string name="toast_sample_saved">%1$s saved</string>
+
+    <!-- Main menu / export -->
+    <string name="error_export_empty">No measurements to export!</string>
+    <string name="toast_export_success">Exported to %1$s</string>
+    <string name="error_export_failed">Export failed</string>
+    <string name="toast_demo_loaded">Demo data loaded</string>
+
+    <!-- Comparison -->
+    <string name="comparison_missing_data">Missing Data:\nPlease record at least one Reference and one Sample.</string>
 </resources>

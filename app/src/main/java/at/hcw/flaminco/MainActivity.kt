@@ -282,7 +282,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun exportDataToCSV() {
         if (DataManager.baseline == null && DataManager.references.isEmpty() && DataManager.samples.isEmpty()) {
-            Toast.makeText(this, "No measurements to export!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.error_export_empty, Toast.LENGTH_SHORT).show()
             return
         }
         try {
@@ -306,9 +306,9 @@ class MainActivity : AppCompatActivity() {
 
             writer.flush()
             writer.close()
-            Toast.makeText(this, "Exported to ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_export_success, file.absolutePath), Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
-            Toast.makeText(this, "Export failed", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.error_export_failed, Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
     }
@@ -429,7 +429,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateButtonStates()
-        Toast.makeText(this, "Demo data loaded", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.toast_demo_loaded, Toast.LENGTH_SHORT).show()
     }
 
     private fun createVector(r: Double, g: Double, b: Double): MeasurementVector {
