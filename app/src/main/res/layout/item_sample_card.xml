@@ -5,8 +5,9 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@color/panel_bg"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardElevation="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +21,7 @@
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginEnd="16dp"
-            android:background="@drawable/bg_card" />
+            android:background="#2A2A2E" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -32,7 +33,7 @@
                 android:id="@+id/tvSampleName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_dark"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -41,7 +42,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="#555555"
+                android:textColor="@color/text_primary"
+                android:alpha="0.7"
                 android:textSize="14sp" />
         </LinearLayout>
 

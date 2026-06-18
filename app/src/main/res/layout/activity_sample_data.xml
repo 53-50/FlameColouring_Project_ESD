@@ -2,23 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mockup_bg"
+    android:background="@color/background_dark"
     android:orientation="vertical">
 
-    <!-- Modern Header -->
+    <!-- Header -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/panel_border"
+        android:background="@color/panel_bg"
         android:paddingHorizontal="24dp"
-        android:paddingVertical="20dp"
-        android:elevation="8dp">
+        android:paddingVertical="20dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sample Measurements"
-            android:textColor="@color/white"
+            android:textColor="@color/text_primary"
             android:textSize="24sp"
             android:textStyle="bold" />
     </RelativeLayout>
@@ -43,18 +42,17 @@
                 android:gravity="center"
                 android:padding="48dp"
                 android:text="No samples recorded yet."
-                android:textColor="@color/text_dark"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:alpha="0.6" />
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Action Area -->
+    <!-- Bottom Area -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1A000000"
         android:padding="16dp">
 
         <Button
@@ -64,7 +62,7 @@
             android:background="@drawable/bg_button_red"
             android:text="BACK TO MENU"
             android:textAllCaps="false"
-            android:textColor="@color/white"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>

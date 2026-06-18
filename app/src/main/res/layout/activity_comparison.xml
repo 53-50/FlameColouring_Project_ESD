@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mockup_bg"
+    android:background="@color/background_dark"
     android:orientation="vertical">
 
     <!-- Header -->
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/panel_border"
+        android:background="@color/panel_bg"
         android:paddingHorizontal="24dp"
-        android:paddingVertical="20dp"
-        android:elevation="8dp">
+        android:paddingVertical="20dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Chemical Analysis Result"
-            android:textColor="@color/white"
+            android:text="Chemical Analysis"
+            android:textColor="@color/text_primary"
             android:textSize="24sp"
-            android:textStyle="bold" />
-    </RelativeLayout>
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -40,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:text="Select Sample"
-                android:textColor="@color/text_dark"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -57,14 +60,14 @@
                     android:orientation="horizontal" />
             </HorizontalScrollView>
 
-            <!-- Selected Sample Summary Card -->
+            <!-- Selected Sample Card -->
             <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="@color/panel_bg"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="6dp">
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -76,8 +79,8 @@
                         android:id="@+id/tvSelectedSampleTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Selected Sample Analysis"
-                        android:textColor="@color/panel_border"
+                        android:text="Active Analysis"
+                        android:textColor="@color/btn_sample"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textAllCaps="true"/>
@@ -87,7 +90,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
                         android:layout_marginTop="12dp"
-                        android:background="#DDDDDD"/>
+                        android:background="#2A2A2E"/>
 
                     <TextView
                         android:id="@+id/tvSampleDetails"
@@ -95,7 +98,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="Sample Data..."
-                        android:textColor="@color/text_dark"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -103,8 +106,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Top Matches (Similarity Index)"
-                android:textColor="@color/text_dark"
+                android:text="Matching Results"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp"/>
@@ -114,7 +117,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-                <!-- Match cards will be added here dynamically -->
+
                 <TextView
                     android:id="@+id/tvComparisonResult"
                     android:layout_width="match_parent"
@@ -122,17 +125,17 @@
                     android:gravity="center"
                     android:padding="40dp"
                     android:text="Analysis pending..."
+                    android:textColor="@color/text_primary"
                     android:alpha="0.6"/>
             </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Action Area -->
+    <!-- Bottom Area -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1A000000"
         android:padding="16dp">
 
         <Button
@@ -142,7 +145,7 @@
             android:background="@drawable/bg_button_red"
             android:text="BACK TO MENU"
             android:textAllCaps="false"
-            android:textColor="@color/white"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
