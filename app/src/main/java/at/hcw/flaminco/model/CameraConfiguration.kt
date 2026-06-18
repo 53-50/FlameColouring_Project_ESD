@@ -23,8 +23,10 @@ data class CameraConfiguration(
         const val STANDARD_WB = "OFF"
         const val STANDARD_FOCUS = "OFF"
         const val WB_AUTO_FROZEN = "AUTO_FROZEN"
-        const val RES_WIDTH = 1920
-        const val RES_HEIGHT = 1080
+        const val PREVIEW_WIDTH = 1280
+        const val PREVIEW_HEIGHT = 720
+        const val RES_WIDTH = PREVIEW_WIDTH
+        const val RES_HEIGHT = PREVIEW_HEIGHT
 
         fun standard() = CameraConfiguration(
             iso = STANDARD_ISO,

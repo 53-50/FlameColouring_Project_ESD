@@ -92,7 +92,11 @@ class SampleActivity : AppCompatActivity() {
         val rotation = windowManager.defaultDisplay.rotation
         val matrix = Matrix()
         val viewRect = RectF(0f, 0f, viewWidth.toFloat(), viewHeight.toFloat())
-        val bufferRect = RectF(0f, 0f, 1080f, 1920f)
+        val bufferRect = RectF(
+            0f, 0f,
+            CameraConfiguration.PREVIEW_HEIGHT.toFloat(),
+            CameraConfiguration.PREVIEW_WIDTH.toFloat()
+        )
         val centerX = viewRect.centerX()
         val centerY = viewRect.centerY()
         
@@ -100,8 +104,8 @@ class SampleActivity : AppCompatActivity() {
             bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
             matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL)
             val scale = Math.max(
-                viewHeight.toFloat() / 1080,
-                viewWidth.toFloat() / 1920
+                viewHeight.toFloat() / CameraConfiguration.PREVIEW_HEIGHT,
+                viewWidth.toFloat() / CameraConfiguration.PREVIEW_WIDTH
             )
             matrix.postScale(scale, scale, centerX, centerY)
             matrix.postRotate((90 * (rotation - 2)).toFloat(), centerX, centerY)
@@ -283,7 +287,7 @@ class SampleActivity : AppCompatActivity() {
 
     private fun createPreviewSession() {
         val texture = textureView.surfaceTexture ?: return
-        texture.setDefaultBufferSize(1920, 1080)
+        texture.setDefaultBufferSize(CameraConfiguration.PREVIEW_WIDTH, CameraConfiguration.PREVIEW_HEIGHT)
         val surface = Surface(texture)
         val device = cameraDevice ?: return
         val handler = backgroundHandler ?: return
