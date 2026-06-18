@@ -28,7 +28,7 @@
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Status: Ready for Baseline"
+            android:text="@string/status_baseline_ready"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:background="#80000000"
@@ -46,7 +46,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_orange"
-                android:text="START BASELINE"
+                android:text="@string/btn_start_baseline"
                 android:textColor="#FFFFFF" />
 
             <Space

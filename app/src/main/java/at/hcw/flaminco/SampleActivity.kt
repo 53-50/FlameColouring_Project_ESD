@@ -40,7 +40,6 @@ class SampleActivity : AppCompatActivity() {
     private val recordedTopFrames = mutableListOf<MeasurementData>()
     private val recordedMiddleFrames = mutableListOf<MeasurementData>()
     private val recordedBottomFrames = mutableListOf<MeasurementData>()
-    private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAnalyzedRoi: Rect? = null
 
     // Messfenster vertikal gestreckt (mehr Daten in der Höhe)
@@ -115,11 +114,11 @@ class SampleActivity : AppCompatActivity() {
 
     private fun startRecording() {
         if (DataManager.baseline == null) {
-            Toast.makeText(this, "Please record a Baseline first!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.error_baseline_required, Toast.LENGTH_LONG).show()
             return
         }
         if (DataManager.session.isSampleLimitReached()) {
-            Toast.makeText(this, "Maximum of 3 samples reached.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.error_sample_limit, Toast.LENGTH_LONG).show()
             return
         }
         if (!isCameraReady) return
@@ -170,21 +169,21 @@ class SampleActivity : AppCompatActivity() {
             
             showSampleNameDialog(correctedVector)
         } else {
-            Toast.makeText(this, "Capture failed. No frames recorded.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.error_capture_failed, Toast.LENGTH_LONG).show()
         }
         btnRecord.isEnabled = true
-        btnRecord.text = "RECORD NEXT SAMPLE"
+        btnRecord.setText(R.string.btn_record_next_sample)
     }
 
     private fun showSampleNameDialog(vector: MeasurementVector) {
         val input = EditText(this)
-        input.hint = "e.g. Probe A, Mixture 1..."
+        input.hint = getString(R.string.hint_sample_name)
         
         AlertDialog.Builder(this)
-            .setTitle("Save Sample")
-            .setMessage("Enter a name for this sample or discard the measurement.")
+            .setTitle(R.string.dialog_save_sample_title)
+            .setMessage(R.string.dialog_save_sample_message)
             .setView(input)
-            .setPositiveButton("Save") { _, _ ->
+            .setPositiveButton(R.string.action_save) { _, _ ->
                 val name = input.text.toString().trim()
                 val sampleName = if (name.isNotEmpty()) name else "Sample #${DataManager.samples.size + 1}"
                 
@@ -203,11 +202,11 @@ class SampleActivity : AppCompatActivity() {
                 }
                 
                 DataManager.session.addSamples(sampleMeasurement)
-                tvStatus.text = "Status: Saved $sampleName"
-                Toast.makeText(this, "$sampleName saved", Toast.LENGTH_SHORT).show()
+                tvStatus.text = getString(R.string.status_saved_sample, sampleName)
+                Toast.makeText(this, getString(R.string.toast_sample_saved, sampleName), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Discard") { dialog, _ ->
-                tvStatus.text = "Status: Discarded"
+            .setNegativeButton(R.string.action_discard) { dialog, _ ->
+                tvStatus.setText(R.string.status_discarded)
                 dialog.dismiss()
             }
             .setCancelable(false)
@@ -296,6 +295,7 @@ class SampleActivity : AppCompatActivity() {
         runOnUiThread { btnRecord.isEnabled = false }
 
         CameraPreviewSession.start(
+            context = this,
             cameraDevice = device,
             surface = surface,
             useManualCameraControls = useManualCameraControls,

@@ -47,7 +47,6 @@ class ReferenceActivity : AppCompatActivity() {
     private val recordedTopFrames = mutableListOf<MeasurementData>()
     private val recordedMiddleFrames = mutableListOf<MeasurementData>()
     private val recordedBottomFrames = mutableListOf<MeasurementData>()
-    private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAnalyzedRoi: Rect? = null
 
     // Messfenster vertikal gestreckt (mehr Daten in der Höhe)
@@ -122,11 +121,11 @@ class ReferenceActivity : AppCompatActivity() {
 
     private fun startRecording() {
         if (DataManager.baseline == null) {
-            Toast.makeText(this, "Please record a Baseline first!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.error_baseline_required, Toast.LENGTH_LONG).show()
             return
         }
         if (DataManager.session.isReferenceLimitReached()) {
-            Toast.makeText(this, "Maximum of 5 references reached.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.error_reference_limit, Toast.LENGTH_LONG).show()
             return
         }
         if (!isCameraReady) return
@@ -177,10 +176,10 @@ class ReferenceActivity : AppCompatActivity() {
             
             showReferenceDialog(correctedVector)
         } else {
-            Toast.makeText(this, "Capture failed. No frames recorded.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.error_capture_failed, Toast.LENGTH_LONG).show()
         }
         btnRecord.isEnabled = true
-        btnRecord.text = "RECORD NEXT"
+        btnRecord.setText(R.string.btn_record_next_reference)
     }
 
     private fun showReferenceDialog(vector: MeasurementVector) {
@@ -204,11 +203,11 @@ class ReferenceActivity : AppCompatActivity() {
         }
 
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Select Reference Element")
-            .setMessage("The recording is finished. Choose the known element or use Other.")
+            .setTitle(R.string.dialog_select_reference_title)
+            .setMessage(R.string.dialog_select_reference_message)
             .setView(ScrollView(this).apply { addView(content) })
-            .setNegativeButton("Discard") { dialog, _ ->
-                tvStatus.text = "Status: Discarded"
+            .setNegativeButton(R.string.action_discard) { dialog, _ ->
+                tvStatus.setText(R.string.status_discarded)
                 dialog.dismiss()
             }
             .setCancelable(false)
@@ -293,18 +292,18 @@ class ReferenceActivity : AppCompatActivity() {
 
     private fun showOtherElementDialog(vector: MeasurementVector) {
         val input = EditText(this)
-        input.hint = "Element name"
+        input.hint = getString(R.string.hint_element_name)
 
         AlertDialog.Builder(this)
-            .setTitle("Other Element")
+            .setTitle(R.string.dialog_other_element_title)
             .setView(input)
-            .setPositiveButton("Save") { _, _ ->
+            .setPositiveButton(R.string.action_save) { _, _ ->
                 val name = input.text.toString().trim()
                 val elementName = if (name.isNotEmpty()) name else "Reference #${DataManager.references.size + 1}"
                 saveReference(vector, elementName)
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                tvStatus.text = "Status: Discarded"
+            .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                tvStatus.setText(R.string.status_discarded)
                 dialog.dismiss()
             }
             .show()
@@ -325,8 +324,8 @@ class ReferenceActivity : AppCompatActivity() {
         )
 
         DataManager.session.addReference(referenceMeasurement)
-        tvStatus.text = "Status: Saved $elementName"
-        Toast.makeText(this, "$elementName added", Toast.LENGTH_SHORT).show()
+        tvStatus.text = getString(R.string.status_saved_reference, elementName)
+        Toast.makeText(this, getString(R.string.toast_reference_added, elementName), Toast.LENGTH_SHORT).show()
     }
 
     private fun currentRegionOfInterest(): RegionOfInterest {
@@ -411,6 +410,7 @@ class ReferenceActivity : AppCompatActivity() {
         runOnUiThread { btnRecord.isEnabled = false }
 
         CameraPreviewSession.start(
+            context = this,
             cameraDevice = device,
             surface = surface,
             useManualCameraControls = useManualCameraControls,

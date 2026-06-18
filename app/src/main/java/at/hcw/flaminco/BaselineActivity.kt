@@ -13,6 +13,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import at.hcw.flaminco.model.*
 import java.util.*
@@ -38,8 +39,8 @@ class BaselineActivity : AppCompatActivity() {
     private val recordedTopFrames = mutableListOf<MeasurementData>()
     private val recordedMiddleFrames = mutableListOf<MeasurementData>()
     private val recordedBottomFrames = mutableListOf<MeasurementData>()
-    private val mainHandler = Handler(Looper.getMainLooper())
     private var lastAnalyzedRoi: Rect? = null
+    private var clearDependentsOnSave = false
 
     // Erhöhtes Messfenster (vertikal gestreckt)
     private val ROI_WIDTH = 200
@@ -58,6 +59,7 @@ class BaselineActivity : AppCompatActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         btnRecord = findViewById(R.id.btnStartRecord)
         frameCapture = ZonedFrameCapture(textureView, roiOverlay, ROI_WIDTH, ROI_HEIGHT, "Baseline")
+        updateRecordButtonLabel()
 
         findViewById<Button>(R.id.btnBackBaseline).setOnClickListener { finish() }
 
@@ -113,6 +115,24 @@ class BaselineActivity : AppCompatActivity() {
 
     private fun startRecording() {
         if (!isCameraReady) return
+
+        if (DataManager.baseline != null && DataManager.hasDependentMeasurements()) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.baseline_rerecord_title)
+                .setMessage(R.string.baseline_rerecord_message)
+                .setPositiveButton(R.string.action_continue) { _, _ ->
+                    beginRecording(clearDependentsOnSave = true)
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+            return
+        }
+
+        beginRecording(clearDependentsOnSave = false)
+    }
+
+    private fun beginRecording(clearDependentsOnSave: Boolean) {
+        this.clearDependentsOnSave = clearDependentsOnSave
         btnRecord.isEnabled = false
         MeasurementSequencer(
             statusTextView = tvStatus,
@@ -168,12 +188,39 @@ class BaselineActivity : AppCompatActivity() {
                 vector = vector,
                 zoneVectors = recordedZoneVectors()
             )
-            
-            tvStatus.text = "Status: Baseline Saved"
-            Toast.makeText(this, "Baseline captured!", Toast.LENGTH_SHORT).show()
+
+            if (clearDependentsOnSave) {
+                DataManager.clearReferencesAndSamples()
+                clearDependentsOnSave = false
+            }
+
+            tvStatus.setText(R.string.status_baseline_saved)
+            Toast.makeText(this, R.string.toast_baseline_captured, Toast.LENGTH_SHORT).show()
+            showBaselineQualityWarningIfNeeded(DataManager.baseline!!)
+        } else {
+            clearDependentsOnSave = false
         }
         btnRecord.isEnabled = true
-        btnRecord.text = "RE-RECORD"
+        updateRecordButtonLabel()
+    }
+
+    private fun updateRecordButtonLabel() {
+        btnRecord.setText(
+            if (DataManager.baseline != null) R.string.btn_rerecord_baseline
+            else R.string.btn_start_baseline
+        )
+    }
+
+    private fun showBaselineQualityWarningIfNeeded(baseline: BaselineMeasurement) {
+        if (baseline.isValidBaseline()) return
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.baseline_invalid_title)
+            .setMessage(
+                getString(R.string.baseline_invalid_message, baseline.vector.intensityMean)
+            )
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun currentRegionOfInterest(): RegionOfInterest {
@@ -252,6 +299,7 @@ class BaselineActivity : AppCompatActivity() {
         runOnUiThread { btnRecord.isEnabled = false }
 
         CameraPreviewSession.start(
+            context = this,
             cameraDevice = device,
             surface = surface,
             useManualCameraControls = useManualCameraControls,

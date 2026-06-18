@@ -37,4 +37,13 @@ object DataManager {
             startupDurationSec = startupDuration
         )
     }
+
+    fun hasDependentMeasurements(): Boolean {
+        return references.isNotEmpty() || samples.isNotEmpty()
+    }
+
+    fun clearReferencesAndSamples() {
+        session.references.clear()
+        session.samples.clear()
+    }
 }
