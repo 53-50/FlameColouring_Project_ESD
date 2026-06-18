@@ -193,8 +193,9 @@ class MainActivity : AppCompatActivity() {
         updateButton(btnRecordSample, hasBaseline)
         updateViewButton(btnViewSample, hasSample, R.drawable.bg_button_green)
 
-        updateButton(btnCompare, hasRef && hasSample)
-        updateButton(btnExport, hasBaseline || hasRef || hasSample)
+        // Comparison and Export now always look like the Demo button (white, 100% alpha)
+        btnCompare.isEnabled = hasRef && hasSample
+        btnExport.isEnabled = hasBaseline || hasRef || hasSample
     }
 
     private fun updateButton(button: Button, enabled: Boolean) {
@@ -207,11 +208,7 @@ class MainActivity : AppCompatActivity() {
         button.alpha = if (hasData) 1.0f else 0.4f
         button.setBackgroundResource(if (hasData) colorResId else R.drawable.bg_button_gray)
         if (hasData) {
-            if (colorResId == R.drawable.bg_button_green) {
-                button.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
-            } else {
-                button.setTextColor(ContextCompat.getColor(this, R.color.text_dark_btn))
-            }
+            button.setTextColor(ContextCompat.getColor(this, R.color.text_dark_btn))
         } else {
             button.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
         }

@@ -75,13 +75,9 @@ class SampleDataActivity : AppCompatActivity() {
         val g = v.values[1].toInt()
         val b = v.values[2].toInt()
 
-        tvValues.text = """
-            Overall ROI
-            R: $r | G: $g | B: $b
-            H: ${"%.1f".format(v.meanHue)}° S: ${"%.2f".format(v.meanSaturation)} V: ${"%.2f".format(v.meanValue)}
-            
-            ${formatZoneValues(data.zoneVectors)}
-        """.trimIndent()
+        tvValues.text = "RGB: $r,$g,$b\n" +
+                        "HSV: ${"%.0f".format(v.meanHue)}°,${"%.2f".format(v.meanSaturation)},${"%.2f".format(v.meanValue)}\n" +
+                        formatZoneValues(data.zoneVectors)
 
         colorPreview.setBackgroundColor(Color.rgb(r, g, b))
 
@@ -96,18 +92,19 @@ class SampleDataActivity : AppCompatActivity() {
     }
 
     private fun formatZoneValues(zones: ZonedMeasurementVectors?): String {
-        if (zones == null) return "Zones: not available"
-        return """
-            Zones
-            Top: ${formatVector(zones.top)}
-            Middle: ${formatVector(zones.middle)}
-            Bottom: ${formatVector(zones.bottom)}
-        """.trimIndent()
+        if (zones == null) return "ZONES: N/A"
+        return "T: ${formatVector(zones.top)}\n" +
+               "M: ${formatVector(zones.middle)}\n" +
+               "B: ${formatVector(zones.bottom)}"
     }
 
     private fun formatVector(v: MeasurementVector): String {
-        return "RGB(${v.values[0].toInt()}, ${v.values[1].toInt()}, ${v.values[2].toInt()}) " +
-            "H:${"%.1f".format(v.meanHue)} S:${"%.2f".format(v.meanSaturation)} V:${"%.2f".format(v.meanValue)}"
+        return "%d,%d,%d|H:%.0f°".format(
+            v.values[0].toInt(), 
+            v.values[1].toInt(), 
+            v.values[2].toInt(), 
+            v.meanHue
+        )
     }
 
     private fun showRenameDialog(data: SampleMeasurement) {

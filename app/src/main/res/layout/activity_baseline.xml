@@ -19,7 +19,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="32dp">
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/tvStatus"
@@ -27,12 +27,9 @@
             android:layout_height="wrap_content"
             android:text="System: Ready for Baseline"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif-light"
-            android:background="@drawable/bg_screen_panel"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:letterSpacing="0.02"/>
+            android:textSize="18sp"
+            android:background="#A61E1E22"
+            android:padding="8dp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -44,26 +41,24 @@
             <Button
                 android:id="@+id/btnStartRecord"
                 android:layout_width="180dp"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_blue"
                 android:text="RECORD"
                 android:textColor="@color/text_dark_btn"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.05" />
+                android:textStyle="bold" />
 
             <Space
-                android:layout_width="24dp"
+                android:layout_width="20dp"
                 android:layout_height="wrap_content" />
 
             <Button
                 android:id="@+id/btnBackBaseline"
-                android:layout_width="140dp"
-                android:layout_height="48dp"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_red"
                 android:text="BACK"
                 android:textColor="@color/text_primary"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.05" />
+                android:textStyle="bold" />
         </LinearLayout>
     </RelativeLayout>
 </FrameLayout>

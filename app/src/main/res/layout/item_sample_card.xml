@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="320dp"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
+    android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="8dp"
     app:cardBackgroundColor="@color/panel_bg"
     app:cardCornerRadius="12dp"
@@ -31,20 +31,24 @@
 
             <TextView
                 android:id="@+id/tvSampleName"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="start"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvSampleValues"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:gravity="start"
                 android:textColor="@color/text_primary"
-                android:alpha="0.7"
-                android:textSize="14sp" />
+                android:alpha="0.85"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:lineSpacingExtra="2dp" />
         </LinearLayout>
 
     </LinearLayout>

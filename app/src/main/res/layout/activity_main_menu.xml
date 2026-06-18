@@ -4,10 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_dark"
-    android:padding="12dp">
+    android:padding="24dp">
 
     <!-- Top Toolbar Actions -->
     <LinearLayout
+        android:id="@+id/llTopActions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -21,7 +22,7 @@
             android:layout_height="44dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_settings_gear"
-            android:contentDescription="Settings"
+            android:contentDescription="@string/btn_settings"
             android:padding="10dp"
             android:scaleType="fitCenter" />
 
@@ -41,14 +42,11 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- Main Content Container (No background rectangle) -->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mainContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_screen_panel"
-        android:paddingStart="24dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/select_recording_type"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -90,13 +88,13 @@
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/camera_status_checking"
                 android:textColor="@color/camera_status_neutral"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="32dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llHeaderTitle">
@@ -114,68 +112,68 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="12dp"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/btnRecordBaseline"
                         android:layout_width="0dp"
-                        android:layout_height="40dp"
+                        android:layout_height="44dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_button_blue"
                         android:text="@string/btn_record_baseline"
                         android:textAllCaps="false"
                         android:textColor="@color/text_dark_btn"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <Space
-                        android:layout_width="10dp"
+                        android:layout_width="12dp"
                         android:layout_height="1dp" />
 
                     <Button
                         android:id="@+id/btnViewBaseline"
-                        android:layout_width="70dp"
-                        android:layout_height="40dp"
+                        android:layout_width="74dp"
+                        android:layout_height="44dp"
                         android:background="@drawable/bg_button_blue"
                         android:text="@string/btn_view"
                         android:textAllCaps="false"
                         android:textColor="@color/text_dark_btn"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="12dp"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/btnRecordReference"
                         android:layout_width="0dp"
-                        android:layout_height="40dp"
+                        android:layout_height="44dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_button_orange"
                         android:text="@string/btn_record_reference"
                         android:textAllCaps="false"
                         android:textColor="@color/text_dark_btn"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <Space
-                        android:layout_width="10dp"
+                        android:layout_width="12dp"
                         android:layout_height="1dp" />
 
                     <Button
                         android:id="@+id/btnViewReference"
-                        android:layout_width="70dp"
-                        android:layout_height="40dp"
+                        android:layout_width="74dp"
+                        android:layout_height="44dp"
                         android:background="@drawable/bg_button_orange"
                         android:text="@string/btn_view"
                         android:textAllCaps="false"
                         android:textColor="@color/text_dark_btn"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -187,28 +185,28 @@
                     <Button
                         android:id="@+id/btnRecordSample"
                         android:layout_width="0dp"
-                        android:layout_height="40dp"
+                        android:layout_height="44dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_button_green"
                         android:text="@string/btn_record_sample"
                         android:textAllCaps="false"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textColor="@color/text_dark_btn"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <Space
-                        android:layout_width="10dp"
+                        android:layout_width="12dp"
                         android:layout_height="1dp" />
 
                     <Button
                         android:id="@+id/btnViewSample"
-                        android:layout_width="70dp"
-                        android:layout_height="40dp"
+                        android:layout_width="74dp"
+                        android:layout_height="44dp"
                         android:background="@drawable/bg_button_green"
                         android:text="@string/btn_view"
                         android:textAllCaps="false"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textColor="@color/text_dark_btn"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
@@ -217,7 +215,7 @@
                 android:id="@+id/llSystemCol"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="24dp"
                 android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_weight="1"
@@ -227,8 +225,8 @@
                 <Button
                     android:id="@+id/btnCompare"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_height="44dp"
+                    android:layout_marginBottom="12dp"
                     android:background="@drawable/bg_button_white"
                     android:text="@string/btn_comp"
                     android:textAllCaps="false"
@@ -239,8 +237,8 @@
                 <Button
                     android:id="@+id/btnLoadDemo"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_height="44dp"
+                    android:layout_marginBottom="12dp"
                     android:background="@drawable/bg_button_white"
                     android:text="@string/btn_load_demo"
                     android:textAllCaps="false"
@@ -251,7 +249,7 @@
                 <Button
                     android:id="@+id/btnExport"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="44dp"
                     android:background="@drawable/bg_button_white"
                     android:text="@string/btn_export"
                     android:textAllCaps="false"

@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_green"
                 android:text="RECORD"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/text_dark_btn"
                 android:textStyle="bold" />
 
             <Space

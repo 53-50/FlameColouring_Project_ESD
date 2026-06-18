@@ -8,12 +8,12 @@
 
     <!-- Vibrant Flame Button Colors -->
     <color name="btn_baseline">#FFD600</color> <!-- Pure Yellow -->
-    <color name="btn_reference">#FF6D00</color> <!-- Deep Vibrant Orange -->
-    <color name="btn_sample">#D50000</color> <!-- Strong Pure Red -->
+    <color name="btn_reference">#FF8C00</color> <!-- Noticeable Orange -->
+    <color name="btn_sample">#FF5252</color> <!-- Light Red -->
 
     <color name="btn_regular">#A1A1AA</color>
     <color name="btn_exit">#D50000</color>
-    <color name="btn_highlight">#F9F9FA</color>
+    <color name="btn_highlight">#FFFFFF</color>
 
     <!-- UI Status Colors -->
     <color name="camera_status_locked">#00E676</color>

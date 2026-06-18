@@ -24,20 +24,13 @@ class BaselineDataActivity : AppCompatActivity() {
 
         if (data != null) {
             val v = data.vector
-            tvValues.text = """
-                Overall ROI
-                Red (R): ${"%.2f".format(v.values[0])}
-                Green (G): ${"%.2f".format(v.values[1])}
-                Blue (B): ${"%.2f".format(v.values[2])}
-                
-                Hue (H): ${"%.1f".format(v.meanHue)}°
-                Saturation (S): ${"%.2f".format(v.meanSaturation)}
-                Value (V): ${"%.2f".format(v.meanValue)}
-                
-                Timestamp: ${data.timestamp}
-                
-                ${formatZoneValues(data.zoneVectors)}
-            """.trimIndent()
+            tvValues.text = "[ROI]\n" +
+                            "RGB: ${v.values[0].toInt()},${v.values[1].toInt()},${v.values[2].toInt()}\n" +
+                            "HSV: ${"%.0f".format(v.meanHue)}°,${"%.2f".format(v.meanSaturation)},${"%.2f".format(v.meanValue)}\n\n" +
+                            "[ZONES]\n" +
+                            formatZoneValues(data.zoneVectors) + "\n\n" +
+                            "[TIME]\n" +
+                            "${data.timestamp}"
         } else {
             tvValues.text = "No baseline recorded yet.\nPlease go to 'Record Baseline' first."
         }
@@ -48,18 +41,19 @@ class BaselineDataActivity : AppCompatActivity() {
     }
 
     private fun formatZoneValues(zones: ZonedMeasurementVectors?): String {
-        if (zones == null) return "Zones: not available"
-        return """
-            Zone Values
-            Top: ${formatVector(zones.top)}
-            Middle: ${formatVector(zones.middle)}
-            Bottom: ${formatVector(zones.bottom)}
-        """.trimIndent()
+        if (zones == null) return "ZONES: N/A"
+        return "T: ${formatVector(zones.top)}\n" +
+               "M: ${formatVector(zones.middle)}\n" +
+               "B: ${formatVector(zones.bottom)}"
     }
 
     private fun formatVector(v: MeasurementVector): String {
-        return "RGB(${v.values[0].toInt()}, ${v.values[1].toInt()}, ${v.values[2].toInt()}) " +
-            "H:${"%.1f".format(v.meanHue)} S:${"%.2f".format(v.meanSaturation)} V:${"%.2f".format(v.meanValue)} " +
-            "I:${"%.1f".format(v.intensityMean)}"
+        return "%d,%d,%d|H:%.0f°|S:%.2f".format(
+            v.values[0].toInt(), 
+            v.values[1].toInt(), 
+            v.values[2].toInt(), 
+            v.meanHue,
+            v.meanSaturation
+        )
     }
 }
