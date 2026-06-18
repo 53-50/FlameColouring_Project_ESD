@@ -78,12 +78,14 @@ class BaselineActivity : AppCompatActivity() {
             override fun onSurfaceTextureDestroyed(st: SurfaceTexture) = true
             override fun onSurfaceTextureUpdated(st: SurfaceTexture) {
                 if (!isRecording) return
-                val sample = frameCapture.tryCaptureFrame() ?: return
-                lastAnalyzedRoi = sample.roi
-                recordedFrames.add(sample.full)
-                recordedTopFrames.add(sample.top)
-                recordedMiddleFrames.add(sample.middle)
-                recordedBottomFrames.add(sample.bottom)
+                frameCapture.tryCaptureFrame { sample ->
+                    if (!isRecording) return@tryCaptureFrame
+                    lastAnalyzedRoi = sample.roi
+                    recordedFrames.add(sample.full)
+                    recordedTopFrames.add(sample.top)
+                    recordedMiddleFrames.add(sample.middle)
+                    recordedBottomFrames.add(sample.bottom)
+                }
             }
         }
     }
@@ -155,6 +157,7 @@ class BaselineActivity : AppCompatActivity() {
 
     private fun stopRecording() {
         isRecording = false
+        frameCapture.invalidatePending()
         if (recordedFrames.isNotEmpty()) {
             val avgR = recordedFrames.map { it.r }.average().toFloat()
             val avgG = recordedFrames.map { it.g }.average().toFloat()
@@ -324,8 +327,14 @@ class BaselineActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        frameCapture.invalidatePending()
         cameraDevice?.close()
         backgroundThread?.quitSafely()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        frameCapture.release()
+        super.onDestroy()
     }
 }

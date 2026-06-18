@@ -3,13 +3,17 @@ package at.hcw.flaminco
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
 import android.os.SystemClock
 import android.view.TextureView
 import android.view.View
 
 /**
- * Samples preview frames at a fixed interval and extracts full + zoned color averages
- * using a single bulk pixel read per sample (performance optimization for recording).
+ * Samples preview frames at a fixed interval and extracts full + zoned color averages.
+ * Bitmap capture and ROI resolution run on the main thread; pixel analysis runs on a
+ * dedicated background thread so the UI stays responsive during recording.
  */
 class ZonedFrameCapture(
     private val textureView: TextureView,
@@ -19,26 +23,67 @@ class ZonedFrameCapture(
     private val frameNamePrefix: String,
     private val sampleIntervalMs: Long = SAMPLE_INTERVAL_MS
 ) {
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val analysisThread = HandlerThread("FrameAnalysis").apply { start() }
+    private val analysisHandler = Handler(analysisThread.looper)
+
     private var cachedRoi: Rect? = null
     private var cachedBitmapWidth = 0
     private var cachedBitmapHeight = 0
     private var lastSampleTimeMs = 0L
+    private var isAnalyzing = false
+    private var captureGeneration = 0
 
     fun reset() {
+        invalidatePending()
         cachedRoi = null
         cachedBitmapWidth = 0
         cachedBitmapHeight = 0
         lastSampleTimeMs = 0L
     }
 
-    fun tryCaptureFrame(): ZonedFrameSample? {
-        val now = SystemClock.elapsedRealtime()
-        if (now - lastSampleTimeMs < sampleIntervalMs) return null
-        lastSampleTimeMs = now
+    /** Drops in-flight analysis callbacks, e.g. when recording stops. */
+    fun invalidatePending() {
+        captureGeneration++
+        isAnalyzing = false
+    }
 
-        val bitmap = textureView.bitmap ?: return null
+    fun release() {
+        invalidatePending()
+        analysisThread.quitSafely()
+    }
+
+    /**
+     * Schedules frame capture when the sample interval has elapsed.
+     * @return true if analysis was scheduled, false if throttled or already analyzing.
+     */
+    fun tryCaptureFrame(onSample: (ZonedFrameSample) -> Unit): Boolean {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastSampleTimeMs < sampleIntervalMs || isAnalyzing) return false
+
+        val bitmap = textureView.bitmap ?: return false
         val roi = resolveRoi(bitmap)
-        return analyzeZonedFrame(bitmap, roi, frameNamePrefix)
+        val bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, false) ?: return false
+
+        lastSampleTimeMs = now
+        isAnalyzing = true
+        val generation = captureGeneration
+
+        analysisHandler.post {
+            val sample = try {
+                analyzeZonedFrame(bitmapCopy, roi, frameNamePrefix)
+            } finally {
+                bitmapCopy.recycle()
+            }
+
+            mainHandler.post {
+                if (generation == captureGeneration) {
+                    isAnalyzing = false
+                    if (sample != null) onSample(sample)
+                }
+            }
+        }
+        return true
     }
 
     private fun resolveRoi(bitmap: Bitmap): Rect {
