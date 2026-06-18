@@ -5,8 +5,9 @@
     android:layout_height="wrap_content"
     android:layout_marginEnd="12dp"
     android:layout_marginBottom="4dp"
+    app:cardBackgroundColor="@color/panel_bg"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardElevation="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Sample"
-            android:textColor="@color/text_dark"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -28,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="38dp"
             android:layout_marginTop="8dp"
-            android:background="#DDDDDD" />
+            android:background="#2A2A2E" />
 
         <TextView
             android:id="@+id/tvComparisonSampleValues"
@@ -36,7 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Sample values"
-            android:textColor="#555555"
+            android:textColor="@color/text_primary"
+            android:alpha="0.7"
             android:textSize="13sp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

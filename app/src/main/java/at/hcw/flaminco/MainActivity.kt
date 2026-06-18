@@ -6,7 +6,9 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.camera2.CameraManager
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -41,12 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnLoadDemo: Button
     private lateinit var btnExport: Button
     private lateinit var btnQuit: Button
-    private lateinit var btnDuration1: Button
-    private lateinit var btnDuration2: Button
-    private lateinit var btnDuration3: Button
-    private lateinit var btnStartup5: Button
-    private lateinit var btnStartup10: Button
-    private lateinit var btnStartup15: Button
+    private lateinit var btnSettings: ImageButton
     private lateinit var tvCameraInfo: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,16 +66,9 @@ class MainActivity : AppCompatActivity() {
         btnLoadDemo = findViewById(R.id.btnLoadDemo)
         btnExport = findViewById(R.id.btnExport)
         btnQuit = findViewById(R.id.btnQuit)
-        btnDuration1 = findViewById(R.id.btnDuration1)
-        btnDuration2 = findViewById(R.id.btnDuration2)
-        btnDuration3 = findViewById(R.id.btnDuration3)
-        btnStartup5 = findViewById(R.id.btnStartup5)
-        btnStartup10 = findViewById(R.id.btnStartup10)
-        btnStartup15 = findViewById(R.id.btnStartup15)
+        btnSettings = findViewById(R.id.btnSettings)
         tvCameraInfo = findViewById(R.id.tvCameraInfo)
 
-        initDurationSelector()
-        initStartupDurationSelector()
         displayCameraStatus()
 
         btnRecordBaseline.setOnClickListener {
@@ -120,65 +110,72 @@ class MainActivity : AppCompatActivity() {
         btnQuit.setOnClickListener {
             finish()
         }
+
+        btnSettings.setOnClickListener {
+            showSettingsDialog()
+        }
     }
 
-    private fun initDurationSelector() {
-        btnDuration1.text = getString(R.string.measurement_duration_seconds, 1)
-        btnDuration2.text = getString(R.string.measurement_duration_seconds, 2)
-        btnDuration3.text = getString(R.string.measurement_duration_seconds, 3)
+    private fun showSettingsDialog() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_settings, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(view)
+            .create()
 
-        btnDuration1.setOnClickListener { setMeasurementDuration(1) }
-        btnDuration2.setOnClickListener { setMeasurementDuration(2) }
-        btnDuration3.setOnClickListener { setMeasurementDuration(3) }
-        updateDurationSelectorUi()
+        val btnD1 = view.findViewById<Button>(R.id.btnDuration1)
+        val btnD2 = view.findViewById<Button>(R.id.btnDuration2)
+        val btnD3 = view.findViewById<Button>(R.id.btnDuration3)
+        val btnS5 = view.findViewById<Button>(R.id.btnStartup5)
+        val btnS10 = view.findViewById<Button>(R.id.btnStartup10)
+        val btnS15 = view.findViewById<Button>(R.id.btnStartup15)
+        val btnSave = view.findViewById<Button>(R.id.btnSaveSettings)
+
+        // Setup texts
+        btnD1.text = getString(R.string.measurement_duration_seconds, 1)
+        btnD2.text = getString(R.string.measurement_duration_seconds, 2)
+        btnD3.text = getString(R.string.measurement_duration_seconds, 3)
+        btnS5.text = getString(R.string.measurement_duration_seconds, 5)
+        btnS10.text = getString(R.string.measurement_duration_seconds, 10)
+        btnS15.text = getString(R.string.measurement_duration_seconds, 15)
+
+        fun updateUI() {
+            updateSettingsButton(btnD1, DataManager.measurementDurationSec == 1)
+            updateSettingsButton(btnD2, DataManager.measurementDurationSec == 2)
+            updateSettingsButton(btnD3, DataManager.measurementDurationSec == 3)
+            updateSettingsButton(btnS5, DataManager.startupDurationSec == 5)
+            updateSettingsButton(btnS10, DataManager.startupDurationSec == 10)
+            updateSettingsButton(btnS15, DataManager.startupDurationSec == 15)
+        }
+
+        btnD1.setOnClickListener { DataManager.measurementDurationSec = 1; updateUI() }
+        btnD2.setOnClickListener { DataManager.measurementDurationSec = 2; updateUI() }
+        btnD3.setOnClickListener { DataManager.measurementDurationSec = 3; updateUI() }
+        btnS5.setOnClickListener { DataManager.startupDurationSec = 5; updateUI() }
+        btnS10.setOnClickListener { DataManager.startupDurationSec = 10; updateUI() }
+        btnS15.setOnClickListener { DataManager.startupDurationSec = 15; updateUI() }
+
+        btnSave.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        updateUI()
+        dialog.show()
     }
 
-    private fun initStartupDurationSelector() {
-        btnStartup5.text = getString(R.string.measurement_duration_seconds, 5)
-        btnStartup10.text = getString(R.string.measurement_duration_seconds, 10)
-        btnStartup15.text = getString(R.string.measurement_duration_seconds, 15)
-
-        btnStartup5.setOnClickListener { setStartupDuration(5) }
-        btnStartup10.setOnClickListener { setStartupDuration(10) }
-        btnStartup15.setOnClickListener { setStartupDuration(15) }
-        updateStartupDurationSelectorUi()
-    }
-
-    private fun setStartupDuration(seconds: Int) {
-        DataManager.startupDurationSec = seconds
-        updateStartupDurationSelectorUi()
-    }
-
-    private fun updateStartupDurationSelectorUi() {
-        val selected = DataManager.startupDurationSec
-        updateDurationButton(btnStartup5, selected == 5)
-        updateDurationButton(btnStartup10, selected == 10)
-        updateDurationButton(btnStartup15, selected == 15)
-    }
-
-    private fun setMeasurementDuration(seconds: Int) {
-        DataManager.measurementDurationSec = seconds
-        updateDurationSelectorUi()
-    }
-
-    private fun updateDurationSelectorUi() {
-        val selected = DataManager.measurementDurationSec
-        updateDurationButton(btnDuration1, selected == 1)
-        updateDurationButton(btnDuration2, selected == 2)
-        updateDurationButton(btnDuration3, selected == 3)
-    }
-
-    private fun updateDurationButton(button: Button, selected: Boolean) {
-        button.setBackgroundResource(
-            if (selected) R.drawable.bg_button_orange else R.drawable.bg_button_gray
-        )
-        button.alpha = if (selected) 1.0f else 0.75f
+    private fun updateSettingsButton(button: Button, selected: Boolean) {
+        if (selected) {
+            button.setBackgroundResource(R.drawable.bg_button_white)
+            button.setTextColor(ContextCompat.getColor(this, R.color.text_dark_btn))
+            button.alpha = 1.0f
+        } else {
+            button.setBackgroundResource(R.drawable.bg_button_gray)
+            button.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
+            button.alpha = 0.75f
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        updateDurationSelectorUi()
-        updateStartupDurationSelectorUi()
         updateButtonStates()
         displayCameraStatus()
     }
@@ -188,17 +185,14 @@ class MainActivity : AppCompatActivity() {
         val hasRef = DataManager.references.isNotEmpty()
         val hasSample = DataManager.samples.isNotEmpty()
 
-        // Step 1: Baseline is the entry point
         updateButton(btnRecordBaseline, true)
-        updateViewButton(btnViewBaseline, hasBaseline)
+        updateViewButton(btnViewBaseline, hasBaseline, R.drawable.bg_button_blue)
 
-        // Step 2: Reference and Sample require a baseline (FR-M-5 / FR-M-19)
         updateButton(btnRecordReference, hasBaseline)
-        updateViewButton(btnViewReference, hasRef)
+        updateViewButton(btnViewReference, hasRef, R.drawable.bg_button_orange)
         updateButton(btnRecordSample, hasBaseline)
-        updateViewButton(btnViewSample, hasSample)
+        updateViewButton(btnViewSample, hasSample, R.drawable.bg_button_green)
 
-        // Step 3: Comparison requires at least one of each
         updateButton(btnCompare, hasRef && hasSample)
         updateButton(btnExport, hasBaseline || hasRef || hasSample)
     }
@@ -208,12 +202,19 @@ class MainActivity : AppCompatActivity() {
         button.alpha = if (enabled) 1.0f else 0.4f
     }
 
-    private fun updateViewButton(button: Button, hasData: Boolean) {
+    private fun updateViewButton(button: Button, hasData: Boolean, colorResId: Int) {
         button.isEnabled = hasData
         button.alpha = if (hasData) 1.0f else 0.4f
-        button.setBackgroundResource(
-            if (hasData) R.drawable.bg_button_green else R.drawable.bg_button_gray
-        )
+        button.setBackgroundResource(if (hasData) colorResId else R.drawable.bg_button_gray)
+        if (hasData) {
+            if (colorResId == R.drawable.bg_button_green) {
+                button.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
+            } else {
+                button.setTextColor(ContextCompat.getColor(this, R.color.text_dark_btn))
+            }
+        } else {
+            button.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
+        }
     }
 
     private fun displayCameraStatus() {
@@ -253,7 +254,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            // FR-M-18: Explain the necessity of the camera before requesting permission
             AlertDialog.Builder(this)
                 .setTitle(R.string.camera_permission_title)
                 .setMessage(R.string.camera_permission_message)
@@ -274,13 +274,10 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, R.string.camera_permission_ready, Toast.LENGTH_SHORT).show()
             } else {
-                // FR-M-18: Inform user that camera is necessary after denial
                 AlertDialog.Builder(this)
                     .setTitle(R.string.camera_permission_denied_title)
                     .setMessage(R.string.camera_permission_denied_message)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> 
-                        // We allow them to stay in the menu but warn them again if they try to record
-                    }
+                    .setPositiveButton(android.R.string.ok) { _, _ -> }
                     .show()
             }
         }

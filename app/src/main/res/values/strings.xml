@@ -13,7 +13,7 @@
     <string name="btn_view">VIEW</string>
     <string name="btn_record_reference">Record Reference</string>
     <string name="btn_record_sample">Record Sample</string>
-    <string name="btn_comp">Comp.</string>
+    <string name="btn_comp">Comparison</string>
     <string name="btn_export">Export</string>
     <string name="btn_load_demo">Demo</string>
     <string name="btn_quit">Quit</string>
