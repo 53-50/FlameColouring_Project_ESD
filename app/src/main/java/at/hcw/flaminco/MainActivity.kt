@@ -222,21 +222,27 @@ class MainActivity : AppCompatActivity() {
             val cameraId = manager.cameraIdList[0]
             val chars = manager.getCameraCharacteristics(cameraId)
             val supportsManual = CameraCapabilities.supportsManualSensor(chars)
+            val lockedConfig = CameraSessionSetup.sessionLockedConfig()
 
-            val config = CameraSessionSetup.sessionLockedConfig()
-                ?: DataManager.baseline?.cameraConfig
-                ?: CameraConfiguration.standard()
-            if (supportsManual) {
-                val expMs = config.exposureTime / 1_000_000
-                tvCameraInfo.text = getString(R.string.camera_status_locked, config.iso, expMs)
-                tvCameraInfo.setTextColor(getColor(R.color.camera_status_locked))
-            } else if (config.isAutoFrozen()) {
-                val expMs = config.exposureTime / 1_000_000
-                tvCameraInfo.text = getString(R.string.camera_status_auto_frozen, config.iso, expMs)
-                tvCameraInfo.setTextColor(getColor(R.color.camera_status_auto_frozen))
-            } else {
-                tvCameraInfo.text = getString(R.string.camera_status_auto)
-                tvCameraInfo.setTextColor(getColor(R.color.camera_status_auto_warning))
+            when {
+                lockedConfig?.isAutoFrozen() == true -> {
+                    val expMs = lockedConfig.exposureTime / 1_000_000
+                    tvCameraInfo.text = getString(R.string.camera_status_auto_frozen, lockedConfig.iso, expMs)
+                    tvCameraInfo.setTextColor(getColor(R.color.camera_status_auto_frozen))
+                }
+                lockedConfig != null -> {
+                    val expMs = lockedConfig.exposureTime / 1_000_000
+                    tvCameraInfo.text = getString(R.string.camera_status_locked, lockedConfig.iso, expMs)
+                    tvCameraInfo.setTextColor(getColor(R.color.camera_status_locked))
+                }
+                supportsManual -> {
+                    tvCameraInfo.text = getString(R.string.camera_status_manual_ready)
+                    tvCameraInfo.setTextColor(getColor(R.color.camera_status_neutral))
+                }
+                else -> {
+                    tvCameraInfo.text = getString(R.string.camera_status_auto)
+                    tvCameraInfo.setTextColor(getColor(R.color.camera_status_auto_warning))
+                }
             }
         } catch (e: Exception) {
             tvCameraInfo.text = getString(R.string.camera_status_unavailable)

@@ -23,6 +23,7 @@ class BaselineActivity : AppCompatActivity() {
     private lateinit var roiOverlay: View
     private lateinit var tvStatus: TextView
     private lateinit var btnRecord: Button
+    private lateinit var frameCapture: ZonedFrameCapture
 
     private var cameraDevice: CameraDevice? = null
     private var captureSession: CameraCaptureSession? = null
@@ -56,6 +57,7 @@ class BaselineActivity : AppCompatActivity() {
         roiOverlay = findViewById(R.id.roiOverlay)
         tvStatus = findViewById(R.id.tvStatus)
         btnRecord = findViewById(R.id.btnStartRecord)
+        frameCapture = ZonedFrameCapture(textureView, roiOverlay, ROI_WIDTH, ROI_HEIGHT, "Baseline")
 
         findViewById<Button>(R.id.btnBackBaseline).setOnClickListener { finish() }
 
@@ -73,7 +75,13 @@ class BaselineActivity : AppCompatActivity() {
             }
             override fun onSurfaceTextureDestroyed(st: SurfaceTexture) = true
             override fun onSurfaceTextureUpdated(st: SurfaceTexture) {
-                if (isRecording) analyzeFrame()
+                if (!isRecording) return
+                val sample = frameCapture.tryCaptureFrame() ?: return
+                lastAnalyzedRoi = sample.roi
+                recordedFrames.add(sample.full)
+                recordedTopFrames.add(sample.top)
+                recordedMiddleFrames.add(sample.middle)
+                recordedBottomFrames.add(sample.bottom)
             }
         }
     }
@@ -105,6 +113,7 @@ class BaselineActivity : AppCompatActivity() {
             recordingDurationSec = DataManager.measurementDurationSec,
             onStartRecording = {
                 isRecording = true
+                frameCapture.reset()
                 recordedFrames.clear()
                 recordedTopFrames.clear()
                 recordedMiddleFrames.clear()
@@ -160,86 +169,9 @@ class BaselineActivity : AppCompatActivity() {
         btnRecord.text = "RE-RECORD"
     }
 
-    private fun analyzeFrame() {
-        val bitmap = textureView.bitmap ?: return
-        val roi = calculateBitmapRoi(bitmap)
-        lastAnalyzedRoi = roi
-        val fullFrame = averageFrame(bitmap, roi, "Baseline Frame") ?: return
-        val zones = splitRoiVertically(roi)
-
-        recordedFrames.add(fullFrame)
-        averageFrame(bitmap, zones.top, "Baseline Top")?.let { recordedTopFrames.add(it) }
-        averageFrame(bitmap, zones.middle, "Baseline Middle")?.let { recordedMiddleFrames.add(it) }
-        averageFrame(bitmap, zones.bottom, "Baseline Bottom")?.let { recordedBottomFrames.add(it) }
-    }
-
-    private fun calculateBitmapRoi(bitmap: Bitmap): Rect {
-        val fallback = centeredFallbackRoi(bitmap)
-        if (textureView.width <= 0 || textureView.height <= 0 || roiOverlay.width <= 0 || roiOverlay.height <= 0) {
-            return fallback
-        }
-
-        val textureLocation = IntArray(2)
-        val overlayLocation = IntArray(2)
-        textureView.getLocationOnScreen(textureLocation)
-        roiOverlay.getLocationOnScreen(overlayLocation)
-
-        val overlayLeftInTexture = overlayLocation[0] - textureLocation[0]
-        val overlayTopInTexture = overlayLocation[1] - textureLocation[1]
-        val scaleX = bitmap.width.toFloat() / textureView.width.toFloat()
-        val scaleY = bitmap.height.toFloat() / textureView.height.toFloat()
-
-        val left = (overlayLeftInTexture * scaleX).toInt().coerceIn(0, bitmap.width - 1)
-        val top = (overlayTopInTexture * scaleY).toInt().coerceIn(0, bitmap.height - 1)
-        val right = ((overlayLeftInTexture + roiOverlay.width) * scaleX).toInt().coerceIn(left + 1, bitmap.width)
-        val bottom = ((overlayTopInTexture + roiOverlay.height) * scaleY).toInt().coerceIn(top + 1, bitmap.height)
-
-        return if (right > left && bottom > top) Rect(left, top, right, bottom) else fallback
-    }
-
     private fun currentRegionOfInterest(): RegionOfInterest {
         val roi = lastAnalyzedRoi ?: Rect(0, 0, ROI_WIDTH, ROI_HEIGHT)
         return RegionOfInterest(roi.left, roi.top, roi.width(), roi.height())
-    }
-
-    private fun averageFrame(bitmap: Bitmap, roi: Rect, name: String): MeasurementData? {
-        var sumR = 0L
-        var sumG = 0L
-        var sumB = 0L
-        var count = 0
-
-        for (y in roi.top until roi.bottom) {
-            for (x in roi.left until roi.right) {
-                val pixel = bitmap.getPixel(x, y)
-                sumR += Color.red(pixel)
-                sumG += Color.green(pixel)
-                sumB += Color.blue(pixel)
-                count++
-            }
-        }
-
-        if (count == 0) return null
-
-        val avgR = (sumR / count).toFloat()
-        val avgG = (sumG / count).toFloat()
-        val avgB = (sumB / count).toFloat()
-        val hsv = FloatArray(3)
-        Color.RGBToHSV(avgR.toInt(), avgG.toInt(), avgB.toInt(), hsv)
-        return MeasurementData(name, avgR, avgG, avgB, hsv[0], hsv[1], hsv[2])
-    }
-
-    private data class RoiZones(
-        val top: Rect,
-        val middle: Rect,
-        val bottom: Rect
-    )
-
-    private fun splitRoiVertically(roi: Rect): RoiZones {
-        val zoneHeight = (roi.height() / 3).coerceAtLeast(1)
-        val top = Rect(roi.left, roi.top, roi.right, (roi.top + zoneHeight).coerceAtMost(roi.bottom))
-        val middle = Rect(roi.left, top.bottom, roi.right, (top.bottom + zoneHeight).coerceAtMost(roi.bottom))
-        val bottom = Rect(roi.left, middle.bottom, roi.right, roi.bottom)
-        return RoiZones(top, middle, bottom)
     }
 
     private fun recordedFeatureSets(): List<FrameFeatureSet> {
@@ -281,16 +213,6 @@ class BaselineActivity : AppCompatActivity() {
             intensityMean = (avgR + avgG + avgB) / 3.0,
             intensityMax = maxOf(avgR, avgG, avgB)
         )
-    }
-
-    private fun centeredFallbackRoi(bitmap: Bitmap): Rect {
-        val centerX = bitmap.width / 2
-        val centerY = bitmap.height / 2
-        val startX = (centerX - ROI_WIDTH / 2).coerceAtLeast(0)
-        val startY = (centerY - ROI_HEIGHT / 2).coerceAtLeast(0)
-        val endX = (startX + ROI_WIDTH).coerceAtMost(bitmap.width)
-        val endY = (startY + ROI_HEIGHT).coerceAtMost(bitmap.height)
-        return Rect(startX, startY, endX, endY)
     }
 
     @SuppressLint("MissingPermission")
