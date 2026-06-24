@@ -407,9 +407,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         listOf(
-            "Demo Sample - Copper" to createVector(42.0, 198.0, 174.0),
-            "Demo Sample - Sodium" to createVector(250.0, 214.0, 38.0),
-            "Demo Sample - Strontium" to createVector(248.0, 64.0, 52.0)
+            "Demo Sample - 1" to createVector(42.0, 198.0, 174.0),
+            "Demo Sample - 2" to createVector(250.0, 214.0, 38.0),
+            "Demo Sample - 3" to createVector(248.0, 64.0, 52.0)
         ).forEach { (sampleName, vector) ->
             DataManager.session.addSamples(
                 SampleMeasurement(
