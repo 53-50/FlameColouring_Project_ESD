@@ -1,4 +1,4 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.activities
 
 import android.Manifest
 import android.content.Intent
@@ -15,15 +15,18 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import at.hcw.flaminco.model.BaselineMeasurement
-import at.hcw.flaminco.model.CameraConfiguration
-import at.hcw.flaminco.model.FrameFeatureSet
-import at.hcw.flaminco.model.MeasurementVector
-import at.hcw.flaminco.model.ReferenceMeasurement
-import at.hcw.flaminco.model.RegionOfInterest
-import at.hcw.flaminco.model.SampleMeasurement
-import at.hcw.flaminco.model.CameraCapabilities
-import at.hcw.flaminco.model.ZonedMeasurementVectors
+import at.hcw.flaminco.camera.CameraSessionSetup
+import at.hcw.flaminco.session_data.DataManager
+import at.hcw.flaminco.R
+import at.hcw.flaminco.models.measurements.BaselineMeasurement
+import at.hcw.flaminco.camera.CameraConfiguration
+import at.hcw.flaminco.models.frames.FrameFeatureSet
+import at.hcw.flaminco.models.measurements.MeasurementVector
+import at.hcw.flaminco.models.measurements.ReferenceMeasurement
+import at.hcw.flaminco.camera.RegionOfInterest
+import at.hcw.flaminco.models.measurements.SampleMeasurement
+import at.hcw.flaminco.camera.CameraCapabilities
+import at.hcw.flaminco.models.measurements.ZonedMeasurementVectors
 import java.io.File
 import java.io.FileWriter
 import java.util.Date

@@ -1,7 +1,8 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.models.frames
 
 import android.graphics.Bitmap
 import android.os.Parcelable
+import at.hcw.flaminco.camera.RegionOfInterest
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import java.util.Date

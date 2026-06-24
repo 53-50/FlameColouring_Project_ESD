@@ -1,6 +1,5 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.session_data
 
-import at.hcw.flaminco.model.MeasurementSession
 import java.util.Date
 import java.util.UUID
 

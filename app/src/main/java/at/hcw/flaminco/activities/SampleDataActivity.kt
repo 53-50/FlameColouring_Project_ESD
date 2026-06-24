@@ -1,4 +1,4 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.activities
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -14,9 +14,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import at.hcw.flaminco.model.MeasurementVector
-import at.hcw.flaminco.model.SampleMeasurement
-import at.hcw.flaminco.model.ZonedMeasurementVectors
+import at.hcw.flaminco.session_data.DataManager
+import at.hcw.flaminco.R
+import at.hcw.flaminco.models.measurements.MeasurementVector
+import at.hcw.flaminco.models.measurements.SampleMeasurement
+import at.hcw.flaminco.models.measurements.ZonedMeasurementVectors
 
 class SampleDataActivity : AppCompatActivity() {
 

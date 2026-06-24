@@ -1,4 +1,4 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.models.frames
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

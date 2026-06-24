@@ -1,4 +1,4 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.camera
 
 import android.content.Context
 import android.hardware.camera2.CameraCaptureSession
@@ -7,7 +7,7 @@ import android.hardware.camera2.CaptureRequest
 import android.os.Handler
 import android.os.Looper
 import android.view.Surface
-import at.hcw.flaminco.model.CameraConfiguration
+import at.hcw.flaminco.R
 
 /**
  * Shared preview setup for manual lock (MANUAL_SENSOR) and auto freeze fallback (FR-M-12).

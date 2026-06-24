@@ -1,4 +1,4 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.models.measurements
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

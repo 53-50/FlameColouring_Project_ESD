@@ -1,5 +1,9 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.models.measurements
 
+import at.hcw.flaminco.camera.CameraConfiguration
+import at.hcw.flaminco.camera.RegionOfInterest
+import at.hcw.flaminco.models.frames.FrameData
+import at.hcw.flaminco.models.frames.FrameFeatureSet
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 

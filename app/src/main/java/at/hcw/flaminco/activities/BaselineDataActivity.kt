@@ -1,13 +1,14 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.activities
 
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import at.hcw.flaminco.model.MeasurementVector
-import at.hcw.flaminco.model.ZonedMeasurementVectors
-import java.util.*
+import at.hcw.flaminco.session_data.DataManager
+import at.hcw.flaminco.R
+import at.hcw.flaminco.models.measurements.MeasurementVector
+import at.hcw.flaminco.models.measurements.ZonedMeasurementVectors
 
 class BaselineDataActivity : AppCompatActivity() {
 

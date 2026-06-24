@@ -1,7 +1,6 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.activities
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.*
 import android.hardware.camera2.*
 import android.os.*
@@ -11,15 +10,27 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import at.hcw.flaminco.model.*
+import at.hcw.flaminco.camera.CameraPreviewSession
+import at.hcw.flaminco.camera.CameraSessionSetup
+import at.hcw.flaminco.session_data.DataManager
+import at.hcw.flaminco.models.measurements.MeasurementData
+import at.hcw.flaminco.util.MeasurementSequencer
+import at.hcw.flaminco.R
+import at.hcw.flaminco.camera.ZonedFrameCapture
+import at.hcw.flaminco.camera.CameraCapabilities
+import at.hcw.flaminco.camera.CameraConfiguration
+import at.hcw.flaminco.camera.RegionOfInterest
+import at.hcw.flaminco.models.frames.FrameFeatureSet
+import at.hcw.flaminco.models.measurements.BaselineMeasurement
+import at.hcw.flaminco.models.measurements.MeasurementVector
+import at.hcw.flaminco.models.measurements.ZonedMeasurementVectors
 import java.util.*
 
-class SampleActivity : AppCompatActivity() {
+class BaselineActivity : AppCompatActivity() {
 
     private lateinit var textureView: TextureView
     private lateinit var roiOverlay: View
@@ -41,8 +52,9 @@ class SampleActivity : AppCompatActivity() {
     private val recordedMiddleFrames = mutableListOf<MeasurementData>()
     private val recordedBottomFrames = mutableListOf<MeasurementData>()
     private var lastAnalyzedRoi: Rect? = null
+    private var clearDependentsOnSave = false
 
-    // Messfenster vertikal gestreckt (mehr Daten in der Höhe)
+    // Erhöhtes Messfenster (vertikal gestreckt)
     private val ROI_WIDTH = 200
     private val ROI_HEIGHT = 450
 
@@ -52,15 +64,16 @@ class SampleActivity : AppCompatActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         
-        setContentView(R.layout.activity_sample)
+        setContentView(R.layout.activity_baseline)
 
         textureView = findViewById(R.id.cameraTextureView)
         roiOverlay = findViewById(R.id.roiOverlay)
         tvStatus = findViewById(R.id.tvStatus)
         btnRecord = findViewById(R.id.btnStartRecord)
-        frameCapture = ZonedFrameCapture(textureView, roiOverlay, ROI_WIDTH, ROI_HEIGHT, "Sample")
+        frameCapture = ZonedFrameCapture(textureView, roiOverlay, ROI_WIDTH, ROI_HEIGHT, "Baseline")
+        updateRecordButtonLabel()
 
-        findViewById<Button>(R.id.btnBackSample).setOnClickListener { finish() }
+        findViewById<Button>(R.id.btnBackBaseline).setOnClickListener { finish() }
 
         btnRecord.setOnClickListener {
             if (!isRecording) startRecording()
@@ -115,16 +128,25 @@ class SampleActivity : AppCompatActivity() {
     }
 
     private fun startRecording() {
-        if (DataManager.baseline == null) {
-            Toast.makeText(this, R.string.error_baseline_required, Toast.LENGTH_LONG).show()
-            return
-        }
-        if (DataManager.session.isSampleLimitReached()) {
-            Toast.makeText(this, R.string.error_sample_limit, Toast.LENGTH_LONG).show()
-            return
-        }
         if (!isCameraReady) return
 
+        if (DataManager.baseline != null && DataManager.hasDependentMeasurements()) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.baseline_rerecord_title)
+                .setMessage(R.string.baseline_rerecord_message)
+                .setPositiveButton(R.string.action_continue) { _, _ ->
+                    beginRecording(clearDependentsOnSave = true)
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+            return
+        }
+
+        beginRecording(clearDependentsOnSave = false)
+    }
+
+    private fun beginRecording(clearDependentsOnSave: Boolean) {
+        this.clearDependentsOnSave = clearDependentsOnSave
         btnRecord.isEnabled = false
         MeasurementSequencer(
             statusTextView = tvStatus,
@@ -149,70 +171,70 @@ class SampleActivity : AppCompatActivity() {
         isRecording = false
         frameCapture.invalidatePending()
         if (recordedFrames.isNotEmpty()) {
-            val rawR = recordedFrames.map { it.r }.average().toFloat()
-            val rawG = recordedFrames.map { it.g }.average().toFloat()
-            val rawB = recordedFrames.map { it.b }.average().toFloat()
+            val avgR = recordedFrames.map { it.r }.average().toFloat()
+            val avgG = recordedFrames.map { it.g }.average().toFloat()
+            val avgB = recordedFrames.map { it.b }.average().toFloat()
             
             val hsv = FloatArray(3)
-            Color.RGBToHSV(rawR.toInt(), rawG.toInt(), rawB.toInt(), hsv)
-
-            val rawVector = MeasurementVector(
-                values = listOf(rawR.toDouble(), rawG.toDouble(), rawB.toDouble()),
+            Color.RGBToHSV(avgR.toInt(), avgG.toInt(), avgB.toInt(), hsv)
+            
+            val vector = MeasurementVector(
+                values = listOf(avgR.toDouble(), avgG.toDouble(), avgB.toDouble()),
                 meanHue = hsv[0].toDouble(),
                 meanSaturation = hsv[1].toDouble(),
                 meanValue = hsv[2].toDouble(),
-                intensityMean = (rawR + rawG + rawB).toDouble() / 3.0,
-                intensityMax = maxOf(rawR, rawG, rawB).toDouble()
+                intensityMean = (avgR + avgG + avgB).toDouble() / 3.0,
+                intensityMax = maxOf(avgR, avgG, avgB).toDouble()
             )
 
-            // FR-M-5: Subtract baseline from sample using centralized method
-            val correctedVector = DataManager.baseline?.let {
-                rawVector.subtract(it.vector)
-            } ?: rawVector
-            
-            showSampleNameDialog(correctedVector)
+            val cameraConfig = activeCameraConfig ?: CameraSessionSetup.previewConfiguration(useManualCameraControls)
+            if (CameraSessionSetup.shouldLockForSession(useManualCameraControls, cameraConfig)) {
+                CameraSessionSetup.lockForSession(cameraConfig)
+            }
+
+            DataManager.baseline = BaselineMeasurement(
+                id = UUID.randomUUID().toString(),
+                timestamp = Date(),
+                durationSec = DataManager.measurementDurationSec,
+                roi = currentRegionOfInterest(),
+                cameraConfig = cameraConfig,
+                rawFrames = emptyList(),
+                featureSets = recordedFeatureSets(),
+                vector = vector,
+                zoneVectors = recordedZoneVectors()
+            )
+
+            if (clearDependentsOnSave) {
+                DataManager.clearReferencesAndSamples()
+                clearDependentsOnSave = false
+            }
+
+            tvStatus.setText(R.string.status_baseline_saved)
+            Toast.makeText(this, R.string.toast_baseline_captured, Toast.LENGTH_SHORT).show()
+            showBaselineQualityWarningIfNeeded(DataManager.baseline!!)
         } else {
-            Toast.makeText(this, R.string.error_capture_failed, Toast.LENGTH_LONG).show()
+            clearDependentsOnSave = false
         }
         btnRecord.isEnabled = true
-        btnRecord.setText(R.string.btn_record_next_sample)
+        updateRecordButtonLabel()
     }
 
-    private fun showSampleNameDialog(vector: MeasurementVector) {
-        val input = EditText(this)
-        input.hint = getString(R.string.hint_sample_name)
-        
+    private fun updateRecordButtonLabel() {
+        btnRecord.setText(
+            if (DataManager.baseline != null) R.string.btn_rerecord_baseline
+            else R.string.btn_start_baseline
+        )
+    }
+
+    private fun showBaselineQualityWarningIfNeeded(baseline: BaselineMeasurement) {
+        if (baseline.isValidBaseline()) return
+
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_save_sample_title)
-            .setMessage(R.string.dialog_save_sample_message)
-            .setView(input)
-            .setPositiveButton(R.string.action_save) { _, _ ->
-                val name = input.text.toString().trim()
-                val sampleName = if (name.isNotEmpty()) name else "Sample #${DataManager.samples.size + 1}"
-                
-                val sampleMeasurement = SampleMeasurement(
-                    id = UUID.randomUUID().toString(),
-                    timestamp = Date(),
-                    durationSec = DataManager.measurementDurationSec,
-                    roi = currentRegionOfInterest(),
-                    cameraConfig = activeCameraConfig ?: CameraSessionSetup.previewConfiguration(useManualCameraControls),
-                    rawFrames = emptyList(),
-                    featureSets = recordedFeatureSets(),
-                    vector = vector,
-                    zoneVectors = correctedZoneVectors()
-                ).apply {
-                    setProbableMatch(sampleName) // We store the display name here
-                }
-                
-                DataManager.session.addSamples(sampleMeasurement)
-                tvStatus.text = getString(R.string.status_saved_sample, sampleName)
-                Toast.makeText(this, getString(R.string.toast_sample_saved, sampleName), Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton(R.string.action_discard) { dialog, _ ->
-                tvStatus.setText(R.string.status_discarded)
-                dialog.dismiss()
-            }
-            .setCancelable(false)
+            .setTitle(R.string.baseline_invalid_title)
+            .setMessage(
+                getString(R.string.baseline_invalid_message, baseline.vector.intensityMean)
+            )
+            .setPositiveButton(android.R.string.ok, null)
             .show()
     }
 
@@ -232,12 +254,6 @@ class SampleActivity : AppCompatActivity() {
                 intensityMax = maxOf(frame.r, frame.g, frame.b).toDouble()
             )
         }
-    }
-
-    private fun correctedZoneVectors(): ZonedMeasurementVectors? {
-        val zones = recordedZoneVectors() ?: return null
-        val baselineZones = DataManager.baseline?.zoneVectors ?: return zones
-        return zones.subtract(baselineZones)
     }
 
     private fun recordedZoneVectors(): ZonedMeasurementVectors? {
@@ -270,7 +286,7 @@ class SampleActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun openCamera() {
-        val manager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val manager = getSystemService(CAMERA_SERVICE) as CameraManager
         try {
             val cameraId = manager.cameraIdList[0]
             val characteristics = manager.getCameraCharacteristics(cameraId)

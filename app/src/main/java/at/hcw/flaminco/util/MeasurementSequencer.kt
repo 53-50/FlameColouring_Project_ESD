@@ -1,10 +1,11 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.util
 
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.CountDownTimer
 import android.widget.TextView
-import at.hcw.flaminco.model.MeasurementSession
+import at.hcw.flaminco.R
+import at.hcw.flaminco.session_data.MeasurementSession
 
 /**
  * Robust sequencer for handling the measurement timing and acoustic feedback (FR-M-20).

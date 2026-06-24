@@ -1,4 +1,4 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.camera
 
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -9,6 +9,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.TextureView
 import android.view.View
+import at.hcw.flaminco.models.measurements.MeasurementData
 
 /**
  * Samples preview frames at a fixed interval and extracts full + zoned color averages.

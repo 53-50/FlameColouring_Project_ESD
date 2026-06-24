@@ -1,4 +1,4 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.activities
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -12,9 +12,11 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import at.hcw.flaminco.model.MeasurementVector
-import at.hcw.flaminco.model.ReferenceMeasurement
-import at.hcw.flaminco.model.SampleMeasurement
+import at.hcw.flaminco.session_data.DataManager
+import at.hcw.flaminco.R
+import at.hcw.flaminco.models.measurements.MeasurementVector
+import at.hcw.flaminco.models.measurements.ReferenceMeasurement
+import at.hcw.flaminco.models.measurements.SampleMeasurement
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.pow

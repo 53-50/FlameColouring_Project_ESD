@@ -1,4 +1,4 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.camera
 
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CaptureRequest

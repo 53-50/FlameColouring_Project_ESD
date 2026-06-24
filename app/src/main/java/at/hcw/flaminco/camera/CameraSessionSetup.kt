@@ -1,9 +1,9 @@
-package at.hcw.flaminco
+package at.hcw.flaminco.camera
 
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.TotalCaptureResult
-import at.hcw.flaminco.model.CameraConfiguration
+import at.hcw.flaminco.session_data.DataManager
 
 /**
  * Session-wide camera configuration for FR-M-12.

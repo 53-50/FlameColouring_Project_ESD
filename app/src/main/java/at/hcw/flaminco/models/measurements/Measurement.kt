@@ -1,6 +1,10 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.models.measurements
 
 import android.os.Parcelable
+import at.hcw.flaminco.camera.CameraConfiguration
+import at.hcw.flaminco.camera.RegionOfInterest
+import at.hcw.flaminco.models.frames.FrameData
+import at.hcw.flaminco.models.frames.FrameFeatureSet
 import java.util.Date
 
 abstract class Measurement : Parcelable {

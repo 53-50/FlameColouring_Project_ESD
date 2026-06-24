@@ -1,4 +1,4 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.models.measurements
 
 enum class MeasurementType {
     BASELINE,

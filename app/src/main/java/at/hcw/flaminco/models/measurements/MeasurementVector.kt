@@ -1,5 +1,6 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.models.measurements
 
+import android.graphics.Color
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -24,7 +25,7 @@ data class MeasurementVector(
         val newValues = values.zip(baseline.values) { s, b -> (s - b).coerceAtLeast(0.0) }
 
         val hsv = FloatArray(3)
-        android.graphics.Color.RGBToHSV(
+        Color.RGBToHSV(
             newValues[0].toInt(),
             newValues[1].toInt(),
             newValues[2].toInt(),

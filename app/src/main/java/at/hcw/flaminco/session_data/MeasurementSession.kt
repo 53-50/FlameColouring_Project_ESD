@@ -1,6 +1,10 @@
-package at.hcw.flaminco.model
+package at.hcw.flaminco.session_data
 
 import android.os.Parcelable
+import at.hcw.flaminco.camera.CameraConfiguration
+import at.hcw.flaminco.models.measurements.BaselineMeasurement
+import at.hcw.flaminco.models.measurements.ReferenceMeasurement
+import at.hcw.flaminco.models.measurements.SampleMeasurement
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 
