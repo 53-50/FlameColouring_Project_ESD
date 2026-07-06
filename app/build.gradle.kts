@@ -7,9 +7,9 @@ plugins {
 android {
     namespace = "at.hcw.flaminco"
 
-    // Wir nutzen 35 als 'Brille' für den Compiler, damit er die alten Ressourcen 
-    // heute noch korrekt verarbeiten kann. Die App bleibt trotzdem 
-    // strikt auf Android 8.0 begrenzt.
+    // Wir nutzen 35 als 'Brille' für den Compiler, damit er die alten Ressourcen
+    // heute noch korrekt verarbeiten kann. Die App bleibt durch minSdk
+    // auf Android 8.0 oder höher begrenzt.
     compileSdk = 35
 
     defaultConfig {
@@ -18,7 +18,6 @@ android {
         minSdk = 26
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 26
-        maxSdk = 26
 
         versionCode = 1
         versionName = "1.0"

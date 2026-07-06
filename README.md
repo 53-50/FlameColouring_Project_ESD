@@ -1,4 +1,4 @@
-# FlameColouring Project powered by ESD (Exellent Software Design - Emanuel Sarah David)
+# FlameColouring Project
 
 Android-Prototyp zur lokalen, bildbasierten Analyse von Flammfärbungen mit Referenzvergleich.
 
@@ -15,18 +15,19 @@ Die App soll Flammenbilder lokal auf einem Android-Gerät auswerten und unbekann
 - Kotlin
 - Android Studio
 - Android Views / XML
-- CameraX
-- OpenCV
+- Camera2 API (`TextureView`, manueller Sensor-Lock mit Auto-Freeze-Fallback)
+- HSV-Farbvektor-Analyse mit zonenbasierter ROI-Auswertung
+- In-Memory-Session (`DataManager` / `MeasurementSession`)
 - CSV-Export
-- GitHub für Versionsverwaltung
+- GitHub
 
-## Voraussetzungen
+## Labor-Workflow (Session)
 
-- Android Studio
-- Android SDK
-- JDK / eingebettetes JDK von Android Studio
-- ein Android-Testgerät oder einen Emulator
-- Git / GitHub
+1. **Baseline** — Flamme aus, nur Umgebungslicht in der ROI; danach Kamera-Lock für die Session
+2. **Reference** — bis zu 5 Elemente, baseline-korrigiert
+3. **Sample** — bis zu 3 Proben, baseline-korrigiert
+4. **Comparison** — gewichteter HSV-Vergleich (Full + Top/Middle/Bottom)
+5. **Export** — CSV mit Zonen-Spalte
 
 ## Projektstruktur
 

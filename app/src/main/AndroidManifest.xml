@@ -12,43 +12,43 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/flaminco_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/flaminco_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.FlaCo"
         tools:targetApi="31">
 
         <activity
-            android:name="at.hcw.flaminco.ComparisonActivity"
+            android:name="at.hcw.flaminco.activities.ComparisonActivity"
             android:screenOrientation="landscape" />
 
         <activity
-            android:name="at.hcw.flaminco.ReferenceActivity"
+            android:name="at.hcw.flaminco.activities.ReferenceActivity"
             android:screenOrientation="landscape" />
 
         <activity
-            android:name="at.hcw.flaminco.BaselineActivity"
+            android:name="at.hcw.flaminco.activities.BaselineActivity"
             android:screenOrientation="landscape" />
 
         <activity
-            android:name="at.hcw.flaminco.BaselineDataActivity"
+            android:name="at.hcw.flaminco.activities.BaselineDataActivity"
             android:screenOrientation="landscape" />
 
         <activity
-            android:name="at.hcw.flaminco.ReferenceDataActivity"
+            android:name="at.hcw.flaminco.activities.ReferenceDataActivity"
             android:screenOrientation="landscape" />
 
         <activity
-            android:name="at.hcw.flaminco.SampleActivity"
+            android:name="at.hcw.flaminco.activities.SampleActivity"
             android:screenOrientation="landscape" />
 
         <activity
-            android:name="at.hcw.flaminco.SampleDataActivity"
+            android:name="at.hcw.flaminco.activities.SampleDataActivity"
             android:screenOrientation="landscape" />
 
         <activity
-            android:name="at.hcw.flaminco.MainActivity"
+            android:name="at.hcw.flaminco.activities.MainActivity"
             android:exported="true"
             android:screenOrientation="landscape">
             <intent-filter>
